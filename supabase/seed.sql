@@ -296,24 +296,28 @@ on conflict (id) do update set
   choices = excluded.choices,
   correct_index = excluded.correct_index;
 
-insert into public.learners (id, display_name, grade_level)
+insert into public.learners (id, learner_code, display_name, grade_level)
 values
   (
     '22222222-2222-4222-8222-222222222222',
+    'L1',
     'Ana',
     2
   ),
   (
     '33333333-3333-4333-8333-333333333333',
+    'L2',
     'Luis',
     4
   ),
   (
     '44444444-4444-4444-8444-444444444444',
+    'L3',
     'Elena',
     6
   )
 on conflict (id) do update set
+  learner_code = excluded.learner_code,
   display_name = excluded.display_name,
   grade_level = excluded.grade_level;
 
