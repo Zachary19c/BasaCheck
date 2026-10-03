@@ -57,6 +57,12 @@ export default async function ProgressPage({
       <div data-progress-slot>
         <ProgressView assessments={assessments} passageTitles={passageTitles} />
       </div>
+      <div className="border-t border-line pt-6">
+        <Link href="/dashboard" className="btn btn-primary w-full sm:w-auto sm:min-w-64">
+          <ArrowLeftIcon size={18} />
+          Choose another learner
+        </Link>
+      </div>
     </main>
   );
 }
