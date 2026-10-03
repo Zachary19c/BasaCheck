@@ -16,7 +16,7 @@ export default async function ProgressPage({
   const { learnerId } = await params;
   const { data: learner, error } = await createClient()
     .from("learners")
-    .select("id, display_name, grade_level")
+    .select("id, learner_code, display_name, grade_level")
     .eq("id", learnerId)
     .maybeSingle();
 
@@ -52,7 +52,9 @@ export default async function ProgressPage({
       </Link>
       <section>
         <h1 className="text-[2.125rem] font-bold leading-tight">{learner.display_name}</h1>
-        <p className="meta mt-2 text-sm">Learner progress · Grade {learner.grade_level}</p>
+        <p className="meta mt-2 text-sm">
+          Learner progress · Grade {learner.grade_level} · Code {learner.learner_code}
+        </p>
       </section>
       <div data-progress-slot>
         <ProgressView assessments={assessments} passageTitles={passageTitles} />

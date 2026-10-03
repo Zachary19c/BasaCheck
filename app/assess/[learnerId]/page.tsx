@@ -36,7 +36,7 @@ export default async function AssessPage({
   const supabase = createClient();
   const learnerResult = await supabase
     .from("learners")
-    .select("id, display_name, grade_level")
+    .select("id, learner_code, display_name, grade_level")
     .eq("id", learnerId)
     .maybeSingle();
   if (learnerResult.error) throw new Error("Could not load the learner and passages.");
@@ -50,7 +50,11 @@ export default async function AssessPage({
     .order("title");
   if (passagesResult.error) throw new Error("Could not load the learner and passages.");
 
-  const learner = learnerResult.data as { display_name: string; grade_level: number };
+  const learner = learnerResult.data as {
+    learner_code: string;
+    display_name: string;
+    grade_level: number;
+  };
   const passages: PassageOption[] = (passagesResult.data as PassageRow[]).map((row) => ({
     id: row.id,
     title: row.title,
@@ -81,7 +85,7 @@ export default async function AssessPage({
         </Link>
         <h1 className="text-[2.125rem] font-bold leading-tight">Reading check</h1>
         <p className="meta text-sm">
-          {learner.display_name} · Grade {learner.grade_level}
+          {learner.display_name} · Grade {learner.grade_level} · Code {learner.learner_code}
         </p>
       </header>
       <AssessmentFlow

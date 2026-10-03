@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 type LearnerRecord = {
   id: string;
+  learner_code: string;
   display_name: string;
   grade_level: number;
 };
@@ -29,7 +30,7 @@ export default async function DashboardPage() {
   const [learnersResult, assessmentsResult] = await Promise.all([
     supabase
       .from("learners")
-      .select("id, display_name, grade_level")
+      .select("id, learner_code, display_name, grade_level")
       .order("grade_level", { ascending: true })
       .order("display_name", { ascending: true }),
     supabase
@@ -73,6 +74,7 @@ export default async function DashboardPage() {
                 <div>
                   <h2 className="text-2xl font-semibold tracking-tight">{learner.display_name}</h2>
                   <p className="meta mt-0.5">Grade {learner.grade_level}</p>
+                  <p className="meta mt-0.5">Learner code {learner.learner_code}</p>
                 </div>
                 {provenanceLabel ? (
                   <span className="tag tag-dashed shrink-0">{provenanceLabel}</span>
