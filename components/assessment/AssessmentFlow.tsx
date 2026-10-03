@@ -9,7 +9,9 @@ import type {
   CreateAssessmentRequest,
   CreateAssessmentResponse,
 } from "@/lib/assessment/contract";
+import type { PassageQuestion } from "@/lib/questions";
 import type { SupportedLanguage } from "@/lib/types";
+import { QuestionBlock } from "@/components/QuestionBlock";
 import { type PassageOption, PassagePicker } from "./PassagePicker";
 import { Recorder } from "./Recorder";
 import { TranscriptReview } from "./TranscriptReview";
@@ -39,6 +41,8 @@ type AssessmentFlowProps = {
   passages: PassageOption[];
   demoMode: boolean;
   fixturePassageIds: string[];
+  // Key-free questions (no answer keys), keyed by passage id.
+  questionsByPassage: Record<string, PassageQuestion[]>;
 };
 
 // Language + passage selection → record → transcribe → teacher confirms the
@@ -48,6 +52,7 @@ export function AssessmentFlow({
   passages,
   demoMode,
   fixturePassageIds,
+  questionsByPassage,
 }: AssessmentFlowProps) {
   const [language, setLanguage] = useState<SupportedLanguage>("fil");
   const [passageId, setPassageId] = useState<string | null>(null);
@@ -252,13 +257,15 @@ export function AssessmentFlow({
             </button>
           </section>
 
-          {/* TODO(Member 4): mount QuestionBlock here, for example
-              <QuestionBlock assessmentId={active.id} passageId={selected.id} language={active.language} /> */}
           <section aria-labelledby="questions-heading" className="space-y-2">
             <h2 id="questions-heading" className="text-lg font-bold">
               Comprehension questions
             </h2>
-            <p className="text-sm text-neutral-600">Questions are not connected yet.</p>
+            <QuestionBlock
+              assessmentId={active.id}
+              language={active.language}
+              questions={selected ? (questionsByPassage[selected.id] ?? []) : []}
+            />
           </section>
         </>
       )}

@@ -5,6 +5,7 @@ import { AssessmentFlow } from "@/components/assessment/AssessmentFlow";
 import type { PassageOption } from "@/components/assessment/PassagePicker";
 import { isUuid } from "@/lib/assessment/api";
 import { isDemoMode } from "@/lib/demo-mode";
+import { getQuestionsForPassage, type PassageQuestion } from "@/lib/questions";
 import { findReadingFixture } from "@/lib/reading";
 import { createClient } from "@/lib/supabase/server";
 import type { SupportedLanguage } from "@/lib/types";
@@ -62,6 +63,14 @@ export default async function AssessPage({
   const fixturePassageIds = passages
     .filter((passage) => findReadingFixture(passage.id, passage.language))
     .map((passage) => passage.id);
+  // Member 4: key-free questions (no correct_index) for each active passage.
+  const questionsByPassage: Record<string, PassageQuestion[]> = Object.fromEntries(
+    await Promise.all(
+      passages.map(
+        async (passage) => [passage.id, await getQuestionsForPassage(passage.id, supabase)] as const,
+      ),
+    ),
+  );
 
   return (
     <main className="mx-auto max-w-md space-y-6 px-4 py-6">
@@ -79,6 +88,7 @@ export default async function AssessPage({
         passages={passages}
         demoMode={isDemoMode()}
         fixturePassageIds={fixturePassageIds}
+        questionsByPassage={questionsByPassage}
       />
     </main>
   );
