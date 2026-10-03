@@ -184,7 +184,7 @@ export function LivePractice({ content, language, onClose }: LivePracticeProps) 
           return (
             <span key={index}>
               <span
-                className={`rounded-md px-1 py-0.5 transition-colors duration-200 ${
+                className={`rounded-md px-1 py-0.5 transition-colors duration-75 ${
                   state === "correct"
                     ? "bg-good-wash text-good"
                     : state === "wrong"

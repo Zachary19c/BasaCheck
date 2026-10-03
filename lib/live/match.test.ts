@@ -61,6 +61,13 @@ describe("live practice matching", () => {
     expect(result.status.slice(0, 5)).toEqual(["correct", "wrong", "correct", "correct", "correct"]);
   });
 
+  it("turns the word being said green once most of it is heard", () => {
+    const early = run("Maagang gumising si Ana upang tulungan ang kanya", 7);
+    expect(early.status[7]).toBe("correct");
+    const tooSoon = run("Maagang gumising si Ana upang tulungan ang ka", 7);
+    expect(tooSoon.status[7]).toBe("pending");
+  });
+
   it("allows small recognition spelling differences in longer words", () => {
     expect(wordsMatch("tulungan", "tulongan")).toBe(true);
     expect(wordsMatch("ina", "ana")).toBe(false);

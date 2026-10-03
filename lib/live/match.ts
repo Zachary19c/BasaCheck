@@ -41,6 +41,12 @@ function isFragment(heard: string, expected: string): boolean {
   return heard.length < expected.length && expected.startsWith(heard);
 }
 
+// Most of the word heard so far ("kanya" for "kanyang") while the learner is
+// still saying it. Turns the word green early; a final result can still undo it.
+function isMostOf(heard: string, expected: string): boolean {
+  return isFragment(heard, expected) && heard.length >= Math.max(3, Math.ceil(expected.length * 0.6));
+}
+
 // `expected` and `heard` are normalized tokens (lib/reading normalize). Words
 // from index `settled` on are still being recognized, so they can only turn a
 // word green, never red.
@@ -50,7 +56,8 @@ export function matchLive(expected: string[], heard: string[], settled = heard.l
 
   heard.forEach((word, index) => {
     const final = index < settled;
-    if (next < expected.length && wordsMatch(word, expected[next])) {
+    const speaking = !final && index === heard.length - 1;
+    if (next < expected.length && (wordsMatch(word, expected[next]) || (speaking && isMostOf(word, expected[next])))) {
       status[next] = "correct";
       next += 1;
       return;
