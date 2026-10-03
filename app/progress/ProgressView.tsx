@@ -48,7 +48,7 @@ function CheckSummary({ title, assessment }: { title: string; assessment: Assess
       </ul>
       {chosen && (
         <p className="text-sm text-neutral-700">
-          Chosen activity: <span lang={assessment.language}>{chosen.title[assessment.language]}</span>
+          Chosen activity: <span lang="en">{chosen.title.en}</span>
         </p>
       )}
       <Link

@@ -8,9 +8,12 @@ import type { InterventionId, SupportedLanguage } from "@/lib/types";
 
 // Owner: Member 4. Three static activity cards. The teacher can save any card;
 // the suggestion is marked only when the demo rule produced one.
+// Cards are teacher-facing, so they always show in English, whatever the
+// passage language.
 
 type InterventionPickerProps = {
   assessmentId: string;
+  // Passage language. Kept for callers; the cards no longer use it.
   language: SupportedLanguage;
   suggested: InterventionId | null;
   chosen: InterventionId | null;
@@ -19,7 +22,6 @@ type InterventionPickerProps = {
 
 export function InterventionPicker({
   assessmentId,
-  language,
   suggested,
   chosen: initialChosen,
   learnerId,
@@ -88,8 +90,8 @@ export function InterventionPicker({
                 />
                 <span className="min-w-0 space-y-2">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span lang={language} className="font-semibold">
-                      {card.title[language]}
+                    <span lang="en" className="font-semibold">
+                      {card.title.en}
                     </span>
                     {suggested === id && (
                       <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
@@ -102,8 +104,8 @@ export function InterventionPicker({
                       </span>
                     )}
                   </span>
-                  <ol lang={language} className="list-decimal space-y-1 pl-5 text-sm text-neutral-700">
-                    {card.steps[language].map((step) => (
+                  <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-neutral-700">
+                    {card.steps.en.map((step) => (
                       <li key={step}>{step}</li>
                     ))}
                   </ol>
@@ -120,7 +122,7 @@ export function InterventionPicker({
         </p>
       )}
       <p role="status" aria-live="polite" className="text-sm text-neutral-700">
-        {chosen ? `Chosen activity: ${INTERVENTIONS[chosen].title[language]}` : "No activity saved yet."}
+        {chosen ? `Chosen activity: ${INTERVENTIONS[chosen].title.en}` : "No activity saved yet."}
       </p>
       <button
         type="submit"
