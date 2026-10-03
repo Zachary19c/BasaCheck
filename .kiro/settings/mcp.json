@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?read_only=true",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
