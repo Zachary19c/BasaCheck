@@ -44,6 +44,8 @@ export function InterventionPicker({
   const [chosen, setChosen] = useState<InterventionId | null>(initialChosen);
   const [selected, setSelected] = useState<InterventionId | null>(initialChosen ?? suggested);
   const [showChooser, setShowChooser] = useState(initialChosen === null);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [guideFinished, setGuideFinished] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,6 +74,8 @@ export function InterventionPicker({
         setChosen(savedId);
         setSelected(savedId);
         setShowChooser(false);
+        setStepIndex(0);
+        setGuideFinished(false);
       }
     } catch (cause) {
       setError(
@@ -95,21 +99,62 @@ export function InterventionPicker({
           {card.title.en}
         </h3>
         <p className="text-sm font-semibold text-teal-950">Focus: {goal.focus}</p>
-        <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-teal-950">
-          {card.steps.en.map((step) => <li key={step}>{step}</li>)}
-        </ol>
-        <p className="text-sm text-teal-950">Look for: {goal.lookFor}</p>
-        <p className="text-sm text-teal-950">
-          Do this activity with the learner. Saving it does not change the reading scores; another
-          reading check gives new scores. Progress compares checks only when they are linked.
-        </p>
+        {guideFinished ? (
+          <div className="space-y-3" aria-live="polite">
+            <p className="font-semibold text-teal-950">You reached the end of the practice guide.</p>
+            <p className="text-sm text-teal-950">Look for: {goal.lookFor}</p>
+            <p className="text-sm text-teal-950">
+              The practice guide does not change reading scores. Another reading check gives new
+              scores; progress compares checks only when they are linked.
+            </p>
+            <Link
+              href={`/assess/${learnerId}`}
+              className="block min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              Start another reading check
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setStepIndex(0);
+                setGuideFinished(false);
+              }}
+              className="min-h-12 w-full rounded-lg border border-teal-700 px-4 font-semibold text-teal-900 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              Review practice steps
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3 rounded-lg border border-teal-200 bg-white p-3" aria-live="polite">
+            <p className="text-sm font-semibold text-teal-900">
+              Step {stepIndex + 1} of {card.steps.en.length}
+            </p>
+            <p lang="en" className="text-lg font-medium text-teal-950">{card.steps.en[stepIndex]}</p>
+            <p className="text-sm text-teal-900">Do this with the learner, then continue.</p>
+            <div className="grid gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (stepIndex === card.steps.en.length - 1) setGuideFinished(true);
+                  else setStepIndex(stepIndex + 1);
+                }}
+                className="min-h-12 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              >
+                {stepIndex === card.steps.en.length - 1 ? "Finish practice guide" : "Next step"}
+              </button>
+              {stepIndex > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStepIndex(stepIndex - 1)}
+                  className="min-h-12 rounded-lg border border-teal-700 px-4 font-semibold text-teal-900 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                >
+                  Previous step
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="grid gap-2">
-          <Link
-            href={`/assess/${learnerId}`}
-            className="min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-          >
-            Start another reading check
-          </Link>
           <button
             type="button"
             onClick={() => setShowChooser(true)}
@@ -188,7 +233,10 @@ export function InterventionPicker({
       {chosen && (
         <button
           type="button"
-          onClick={() => { setSelected(chosen); setShowChooser(false); }}
+          onClick={() => {
+            setSelected(chosen);
+            setShowChooser(false);
+          }}
           className="min-h-12 w-full rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
         >
           Keep saved activity

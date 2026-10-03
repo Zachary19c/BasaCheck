@@ -141,7 +141,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
       {complete && (
         <section aria-labelledby="activity-heading" className="space-y-3">
           <h2 id="activity-heading" className="text-lg font-bold">
-            Teacher activity
+            Recommended activity
           </h2>
           <p className="text-sm text-neutral-700">
             {suggested
