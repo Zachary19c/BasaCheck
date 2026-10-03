@@ -76,7 +76,14 @@ select
   ),
   true
 from source
-on conflict (id) do nothing;
+on conflict (id) do update set
+  title = excluded.title,
+  content = excluded.content,
+  language = excluded.language,
+  grade_level = excluded.grade_level,
+  difficulty = excluded.difficulty,
+  word_count = excluded.word_count,
+  is_active = excluded.is_active;
 
 insert into public.questions (id, passage_id, position, prompt, choices, correct_index)
 values
@@ -176,7 +183,12 @@ values
     '["His teacher","His friend","His sister"]'::jsonb,
     2
   )
-on conflict (id) do nothing;
+on conflict (id) do update set
+  passage_id = excluded.passage_id,
+  position = excluded.position,
+  prompt = excluded.prompt,
+  choices = excluded.choices,
+  correct_index = excluded.correct_index;
 
 insert into public.learners (id, display_name, grade_level)
 values (
@@ -184,7 +196,9 @@ values (
   'Ana',
   2
 )
-on conflict (id) do nothing;
+on conflict (id) do update set
+  display_name = excluded.display_name,
+  grade_level = excluded.grade_level;
 
 -- Baseline: upang spoken as para. One same-position substitution, 20 seconds.
 -- Follow-up: the passage read as written, 18 seconds, comprehension 3/3.
@@ -252,7 +266,8 @@ insert into public.assessments (
   word_events,
   support_area,
   intervention_id,
-  baseline_assessment_id
+  baseline_assessment_id,
+  created_at
 )
 select
   '30000000-0000-4000-8000-000000000001',
@@ -277,7 +292,8 @@ select
     else null
   end,
   'main-idea',
-  null
+  null,
+  now() - interval '1 minute'
 from scored
 on conflict (id) do nothing;
 
@@ -329,7 +345,8 @@ insert into public.assessments (
   word_events,
   support_area,
   intervention_id,
-  baseline_assessment_id
+  baseline_assessment_id,
+  created_at
 )
 select
   '30000000-0000-4000-8000-000000000002',
@@ -354,6 +371,7 @@ select
     else null
   end,
   null,
-  '30000000-0000-4000-8000-000000000001'
+  '30000000-0000-4000-8000-000000000001',
+  now()
 from scored
 on conflict (id) do nothing;
