@@ -49,11 +49,23 @@ describe("live practice matching", () => {
     expect(result.status.slice(0, 2)).toEqual(["correct", "pending"]);
   });
 
-  it("keeps turning words green past a misheard word that is not final yet", () => {
+  it("turns a different word red as soon as the learner reads past it", () => {
     // Chrome can keep a whole sentence unconfirmed while the learner reads.
     const result = run("Maagang kumain si Ana upang", 0);
-    expect(result.status.slice(0, 5)).toEqual(["correct", "pending", "correct", "correct", "correct"]);
+    expect(result.status.slice(0, 5)).toEqual(["correct", "wrong", "correct", "correct", "correct"]);
     expect(result.next).toBe(5);
+  });
+
+  it("turns words red when the learner says unrelated words", () => {
+    const result = run("Maagang hello world", 0);
+    expect(result.status.slice(0, 2)).toEqual(["correct", "wrong"]);
+  });
+
+  it("does not cascade red when one word is heard as several pieces", () => {
+    // "tulungan" heard as "to long an".
+    const result = run("Maagang gumising si Ana upang to long an ang kanyang");
+    expect(result.status.slice(5, 8)).toEqual(["wrong", "correct", "correct"]);
+    expect(result.status.filter((value) => value === "wrong")).toHaveLength(1);
   });
 
   it("marks the skipped word red once the words are final", () => {

@@ -53,37 +53,46 @@ function isMostOf(heard: string, expected: string): boolean {
 export function matchLive(expected: string[], heard: string[], settled = heard.length): LiveMatch {
   const status: LiveStatus[] = expected.map(() => "pending");
   let next = 0;
+  // Heard words in a row that match nothing nearby.
+  let misses = 0;
 
   heard.forEach((word, index) => {
     const final = index < settled;
-    const speaking = !final && index === heard.length - 1;
+    const last = index === heard.length - 1;
+    const speaking = !final && last;
     if (next < expected.length && (wordsMatch(word, expected[next]) || (speaking && isMostOf(word, expected[next])))) {
       status[next] = "correct";
       next += 1;
+      misses = 0;
       return;
     }
     // Repeating or fixing the word just read is a stutter or self-correction.
     if (next > 0 && wordsMatch(word, expected[next - 1])) {
       status[next - 1] = "correct";
+      misses = 0;
       return;
     }
     if (next >= expected.length || isFragment(word, expected[next])) return;
 
-    // Skipped ahead. Final words mark the words in between red; words still
-    // being recognized leave them pending, so one misheard word never stops
-    // the rest of the reading from turning green.
+    // The learner moved past words: they were read differently or skipped.
     for (let ahead = next + 1; ahead <= Math.min(next + LOOKAHEAD, expected.length - 1); ahead += 1) {
       if (wordsMatch(word, expected[ahead])) {
-        if (final) for (let missed = next; missed < ahead; missed += 1) status[missed] = "wrong";
+        for (let missed = next; missed < ahead; missed += 1) status[missed] = "wrong";
         status[ahead] = "correct";
         next = ahead + 1;
+        misses = 0;
         return;
       }
     }
-    if (!final) return;
-    // A different word in place of the expected one.
-    status[next] = "wrong";
-    next += 1;
+
+    // A different word. One alone may be a filler or the start of a fix, so
+    // wait for the next word; two in a row, or a final last word, is a miss.
+    misses += 1;
+    if (misses >= 2 || (final && last)) {
+      status[next] = "wrong";
+      next += 1;
+      misses = 0;
+    }
   });
 
   return { status, next };
