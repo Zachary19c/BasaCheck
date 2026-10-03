@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AiRecommendation } from "@/components/AiRecommendation";
 import { InterventionPicker } from "@/components/InterventionPicker";
 import { ProvenanceLabels } from "@/components/ProvenanceLabels";
 import { isUuid } from "@/lib/assessment/api";
@@ -134,6 +135,8 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
           </ul>
         )}
       </section>
+
+      {complete && <AiRecommendation assessmentId={assessment.id} />}
 
       {complete && (
         <section aria-labelledby="activity-heading" className="space-y-3">
