@@ -286,9 +286,10 @@ export function AssessmentFlow({
             aria-labelledby="read-heading"
             className="panel space-y-5 p-5"
           >
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+            {/* Title full width, then the recorder above the passage so it never needs a scroll. */}
+            <div className="space-y-4">
               <div>
-                <h2 id="read-heading" className="text-lg font-semibold">
+                <h2 id="read-heading" className="text-xl font-semibold">
                   {selected.title}
                 </h2>
                 <p lang={selected.language} className="mt-1 text-sm font-medium text-teal-deep">
@@ -296,9 +297,7 @@ export function AssessmentFlow({
                 </p>
               </div>
               {!startingDemo && (
-                <div className="sm:w-56">
-                  <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
-                </div>
+                <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
               )}
             </div>
             <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
