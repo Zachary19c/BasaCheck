@@ -86,7 +86,7 @@ No login. RLS is enabled on every table with no policies and no grants to `anon`
 
 Seed Ana, four original passages (two per language), twelve reviewed questions, and one completed illustrative follow-up for the primary Filipino passage. Follow-up has a confirmed transcript and metrics derived by the same engine, `seeded_demo=true`, and comprehension 3/3. Link it explicitly to the demo baseline for progress; never infer a pair merely from creation times. Preserve it when adding live runs. The primary passage has 33 normalized tokens; one substitution gives 32/33 accuracy, and 33 seconds gives 60 WPM.
 
-`DEMO_MODE=true`: offer a matching prepared transcript alongside live recording. Label a speech assessment as Demo Mode only when the teacher selects the prepared transcript. An offline tap stays `input_mode = tap` and `demo_transcript = false`. Speech failure returns an error; only explicit teacher selection starts a disclosed fixture assessment. No silent fallback.
+`DEMO_MODE=true`: offer a matching sample transcript in a separate, collapsed Demo Mode section. Label a speech assessment as Demo Mode only when the teacher selects the sample. A live recording's recognized transcript appears after Stop, with browser-only audio replay for teacher review. An offline tap stays `input_mode = tap` and `demo_transcript = false`. Speech failure returns an error; only explicit teacher selection starts a disclosed fixture assessment. No silent fallback.
 
 ## Environment and layout
 
