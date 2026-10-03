@@ -15,8 +15,9 @@ Primary user: an early-grade teacher using a mobile-friendly browser. Use only f
 - No login. The app opens directly on Ana's dashboard.
 - Filipino (default) and English selection inside the Assessment screen.
 - Four seeded, team-created passages: two per language, with three reviewed multiple-choice questions each.
-- One language and one selected passage per assessment. The teacher controls passage selection; changing language or passage after recording requires a new assessment.
+- One language and one selected passage per assessment. The teacher controls passage selection; changing language or passage after the check starts requires a new assessment.
 - Browser recording, local faster-whisper integration, and an explicitly labeled fixture fallback.
+- Offline tap: the teacher marks missed words on the passage instead of recording. No microphone and no speech service. The same scoring engine runs after the teacher confirms the marked text. Results stay labeled **Offline tap**, not Demo Mode. Saving the check still needs the app server.
 - Teacher transcript confirmation/correction before reading scoring.
 - Deterministic token alignment, passage reading accuracy, reading rate, and comprehension scoring.
 - Transparent demo support suggestions, three static intervention cards, and teacher selection.
@@ -27,20 +28,32 @@ Primary user: an early-grade teacher using a mobile-friendly browser. Use only f
 | Screen | Job |
 | --- | --- |
 | Dashboard | Ana, latest result, start assessment, progress link |
-| Assessment | Language + passage selection, record/stop, teacher transcript review, three questions |
+| Assessment | Language + passage selection, record/stop or offline tap, teacher transcript review, three questions |
 | Results | Measurements, word differences, demo suggestion, teacher intervention choice |
 | Progress | First check and follow-up with provenance labels |
 
 ## Assessment loop
 
-Choose learner → choose language/passage → record → transcribe → teacher verifies transcript → score reading → answer three questions → score comprehension → review results → select intervention → compare follow-up.
+Choose learner → choose language/passage → record and transcribe, or mark words offline → teacher verifies transcript → score reading → answer three questions → score comprehension → review results → select intervention → compare follow-up.
 
-Transcript review includes the expected passage, original transcript, editable spoken transcript, and **Confirm transcript**. Correct recognition mistakes to what the learner actually said; do not rewrite the transcript to match the passage. Confirmation is required even in Demo Mode. Audio is released after transcription; replay is outside this MVP. If the teacher cannot verify the wording, record again rather than invent a score.
+Transcript review includes the expected passage, the original transcript, an editable spoken transcript, and **Confirm transcript**. Correct mistakes so the text matches what the learner actually said; do not rewrite it to match the passage. Confirmation is required for a recording, a prepared fixture, and an offline tap. Audio is released after transcription; replay is outside this MVP. If the teacher cannot verify a recording, record again. If a tap does not match what was said, mark the words again.
+
+### Offline tap
+
+After a passage is chosen, **Mark words offline** starts a check with `input_mode = tap`.
+
+1. The passage is shown as the normalizer's words.
+2. **Start reading** starts a timer. That elapsed time is the duration used for reading rate.
+3. Tap a missed word. Type what the learner said instead, or leave the box blank if the word was skipped. Untapped words count as read.
+4. **Done reading** builds the spoken transcript with `transcriptFromTaps` and saves it through `POST /api/assessments/[id]/tap`. That route does not score.
+5. The teacher checks the marked text, confirms, and continues to the three questions.
+
+An offline tap is not Demo Mode, even when `DEMO_MODE=true`. It stores no audio. It is not a phone-only queue: the save still goes to the app server. A full offline PWA remains out of scope.
 
 ## Measurements and suggestions
 
 - **Passage Reading Accuracy** = aligned matches / expected passage token count × 100. Insertions are shown as differences but do not reduce this match-based percentage. It is not a complete reading-ability measure.
-- **Reading Rate** = verified spoken token count × 60 / recording duration in seconds. This includes pauses and recording lead/trail time; it is not a fluency diagnosis.
+- **Reading Rate** = verified spoken token count × 60 / duration in seconds. A recording uses the decoded audio length, including pauses and lead/trail time. An offline tap uses the on-screen timer. It is not a fluency diagnosis.
 - **Comprehension** = correct answers / 3 × 100; use the server-side answer key.
 - Require nonempty expected/verified text and positive finite duration; otherwise show an error with no reading percentage.
 - Round only for display; retain unrounded values for rules.
@@ -81,15 +94,15 @@ The seeded follow-up is illustrative data, visibly labeled **Seeded demo assessm
 
 - No login. All database reads and writes go through Next.js server routes using the server-only service-role key. RLS stays enabled with no browser grants, so the public anon key cannot read or write any table. Anyone who can reach the app can use it, so run it locally with fictional data only.
 - Question answer keys stay server-side, including during question fetch.
-- Audio is processed temporarily in memory or temporary files and is not retained in the database after transcription. Clean temporary files on success and failure; no public audio URL.
-- Failed speech processing leaves an error with no fabricated scores. Offer retry or an explicit Demo Mode choice using matching fixtures.
-- Fixture results and seeded follow-ups remain visibly labeled on results and progress.
+- Audio is processed temporarily in memory or temporary files and is not retained in the database after transcription. Clean temporary files on success and failure; no public audio URL. An offline tap never creates audio.
+- Failed speech processing leaves an error with no fabricated scores. Offer retry or an explicit Demo Mode choice using matching fixtures. Offline tap stays available as its own choice and is labeled separately.
+- Fixture results, seeded follow-ups, and offline taps remain visibly labeled on results and progress.
 - Secrets stay in server environment variables; use fictional data only.
 
 ## Acceptance criteria
 
-The four-screen loop works at phone width for both languages; language filters passages/questions correctly; no reading scoring runs before transcript confirmation; a corrected transcript recomputes measurements; WPM never triggers a support suggestion; intervention choice persists; a failed transcription shows retry/demo choices; mismatched passage fixtures cannot be scored; seeded follow-up survives new recordings; the browser anon key cannot read or write any table.
+The four-screen loop works at phone width for both languages; language filters passages/questions correctly; no reading scoring runs before transcript confirmation; a corrected transcript recomputes measurements; WPM never triggers a support suggestion; intervention choice persists; a failed transcription shows retry/demo choices; mismatched passage fixtures cannot be scored; seeded follow-up survives new recordings; the browser anon key cannot read or write any table. An offline tap of one missed word is scored by the same engine, labeled Offline tap, and not labeled Demo Mode.
 
 ## Out of scope
 
-WhisperX, phoneme/pronunciation analysis, pause/disfluency detection, Gemini or generated lesson plans, AI passage generation, teacher passage-authoring UI, automatic reading-level classification, learner management, admin/parent portals, class analytics, export, offline/PWA, educational benchmarks, and additional passage libraries. Live speech integration is part of development; use a disclosed fixture for judging if it is unstable.
+WhisperX, phoneme/pronunciation analysis, pause/disfluency detection, Gemini or generated lesson plans, AI passage generation, teacher passage-authoring UI, automatic reading-level classification, learner management, admin/parent portals, class analytics, export, a full offline PWA or queued sync, educational benchmarks, and additional passage libraries. Offline tap is in scope; it still saves through the server. Live speech integration is part of development; use a disclosed fixture for judging if it is unstable.

@@ -19,3 +19,4 @@ export {
 export { EN_FIXTURES } from "./fixture-en";
 export { FIL_FIXTURES } from "./fixture-fil";
 export { findReadingFixture, READING_FIXTURES } from "./fixtures";
+export { transcriptFromTaps, type TapMark } from "./taps";

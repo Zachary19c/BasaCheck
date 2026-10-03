@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 const ASSESSMENT_COLUMNS =
-  "id, learner_id, passage_id, language, status, transcript, verified_transcript, transcript_verified_at, demo_transcript, seeded_demo, duration_seconds, accuracy_percent, wpm, comprehension_percent, answer_indexes, word_events, support_area, intervention_id, baseline_assessment_id, error_code, created_at";
+  "id, learner_id, passage_id, language, status, transcript, verified_transcript, transcript_verified_at, demo_transcript, seeded_demo, input_mode, duration_seconds, accuracy_percent, wpm, comprehension_percent, answer_indexes, word_events, support_area, intervention_id, baseline_assessment_id, error_code, created_at";
 
 const EVENT_LABELS: Record<WordEvent["type"], string> = {
   match: "Match",
@@ -158,10 +158,14 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
 
       <Link
         href={`/progress/${assessment.learnerId}`}
-        className="block min-h-12 rounded-lg border border-neutral-400 px-4 py-3 text-center font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+        className="block min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
       >
-        View progress
+        View observed change
       </Link>
+      <p className="text-sm text-neutral-600">
+        Progress compares a check only with the follow-up linked to it. Saving an activity does not
+        create that follow-up.
+      </p>
     </main>
   );
 }

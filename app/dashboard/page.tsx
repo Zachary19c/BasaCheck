@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     supabase
       .from("assessments")
       .select(
-        "id, learner_id, passage_id, language, status, transcript, verified_transcript, transcript_verified_at, demo_transcript, seeded_demo, duration_seconds, accuracy_percent, wpm, comprehension_percent, answer_indexes, word_events, support_area, intervention_id, baseline_assessment_id, error_code, created_at, passages(title)",
+        "id, learner_id, passage_id, language, status, transcript, verified_transcript, transcript_verified_at, demo_transcript, seeded_demo, input_mode, duration_seconds, accuracy_percent, wpm, comprehension_percent, answer_indexes, word_events, support_area, intervention_id, baseline_assessment_id, error_code, created_at, passages(title)",
       )
       .eq("learner_id", ANA_LEARNER_ID)
       .eq("status", "complete")
@@ -50,9 +50,11 @@ export default async function DashboardPage() {
     : latestRecord?.passages;
   const provenanceLabel = latest?.seededDemo
     ? "Seeded demo"
-    : latest?.demoTranscript
-      ? "Demo Mode"
-      : null;
+    : latest?.inputMode === "tap"
+      ? "Offline tap"
+      : latest?.demoTranscript
+        ? "Demo Mode"
+        : null;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6">

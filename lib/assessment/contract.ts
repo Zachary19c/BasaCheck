@@ -21,6 +21,8 @@ export type CreateAssessmentRequest = {
   language: SupportedLanguage;
   // Explicit teacher choice to use the passage's prepared transcript.
   useFixture?: boolean;
+  // tap: mark missed words with no microphone. speech is the default.
+  inputMode?: "speech" | "tap";
 };
 
 export type CreateAssessmentResponse = {
@@ -38,6 +40,13 @@ export type AudioResponse = {
   transcript: string;
   durationSeconds: number;
   demoTranscript: boolean;
+};
+
+export type TapResponse = {
+  id: string;
+  status: "review";
+  transcript: string;
+  durationSeconds: number;
 };
 
 export type ConfirmRequest = {

@@ -2,6 +2,8 @@
 
 Local FastAPI + faster-whisper service for BasaCheck. Bound to localhost. Tested with Python 3.13 on Windows.
 
+Offline tap does not call this service. The teacher marks missed words in the app, and `POST /api/assessments/[id]/tap` stores that transcript.
+
 ```powershell
 cd speech-service
 python -m venv .venv

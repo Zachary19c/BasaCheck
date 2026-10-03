@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const body = await readJsonObject(request);
   if (!body) return apiError(400, "invalid_request", "Send a JSON body.");
 
-  const { learnerId, passageId, language, useFixture } = body;
+  const { learnerId, passageId, language, useFixture, inputMode } = body;
   if (!isUuid(learnerId) || !isUuid(passageId)) {
     return apiError(400, "invalid_request", "learnerId and passageId must be valid IDs.");
   }
@@ -21,6 +21,12 @@ export async function POST(request: Request) {
   }
   if (useFixture !== undefined && typeof useFixture !== "boolean") {
     return apiError(400, "invalid_request", "useFixture must be true or false.");
+  }
+  if (inputMode !== undefined && inputMode !== "speech" && inputMode !== "tap") {
+    return apiError(400, "invalid_request", "inputMode must be speech or tap.");
+  }
+  if (inputMode === "tap" && useFixture === true) {
+    return apiError(400, "invalid_request", "An offline tap does not use a prepared transcript.");
   }
 
   const supabase = createClient();
@@ -47,7 +53,9 @@ export async function POST(request: Request) {
     return apiError(400, "language_mismatch", "The selected language does not match this passage.");
   }
 
-  const demoTranscript = isDemoMode() || useFixture === true;
+  const offlineTap = inputMode === "tap";
+  // Demo Mode labels speech checks. An offline tap stays a teacher-marked check.
+  const demoTranscript = !offlineTap && (isDemoMode() || useFixture === true);
   if (demoTranscript && !findReadingFixture(passageId, passageLanguage)) {
     return apiError(
       409,
@@ -64,6 +72,7 @@ export async function POST(request: Request) {
       language: passageLanguage,
       status: "recording",
       demo_transcript: demoTranscript,
+      input_mode: offlineTap ? "tap" : "speech",
     })
     .select("id")
     .single();

@@ -70,7 +70,7 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
       {result.kind === "pair" && (
         <>
-          <h3 className="text-lg font-bold">Observed change</h3>
+          <h3 className="text-lg font-bold">Observed change after intervention</h3>
           <p className="text-sm text-neutral-700">{COMPARISON_NOTE}</p>
           <ul className="space-y-1 rounded-xl border border-neutral-200 p-3 text-sm font-medium">
             {result.lines.map((line) => (

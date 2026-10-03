@@ -27,6 +27,7 @@ const ASSESSMENT_DEFAULTS: Row = {
   transcript_verified_at: null,
   demo_transcript: false,
   seeded_demo: false,
+  input_mode: "speech",
   answer_indexes: null,
   accuracy_percent: null,
   wpm: null,
@@ -63,6 +64,7 @@ function violation(row: Row): string | null {
   if (!["recording", "processing", "review", "complete", "error"].includes(row.status as string)) {
     return "assessments_status_check";
   }
+  if (!["speech", "tap"].includes(row.input_mode as string)) return "assessments_input_mode_check";
   if (row.duration_seconds !== null && !((row.duration_seconds as number) > 0)) {
     return "assessments_duration_positive";
   }
@@ -167,6 +169,7 @@ vi.mock("@/lib/supabase/server", () => ({
 const { POST: createAssessment } = await import("@/app/api/assessments/route");
 const { POST: uploadAudio } = await import("@/app/api/assessments/[id]/audio/route");
 const { POST: confirmTranscript } = await import("@/app/api/assessments/[id]/confirm/route");
+const { POST: saveTap } = await import("@/app/api/assessments/[id]/tap/route");
 
 function jsonRequest(body: unknown) {
   return new Request("http://localhost/api", {
@@ -272,6 +275,25 @@ describe("POST /api/assessments", () => {
       expect(response.status).toBe(201);
       expect((await response.json()).demoTranscript).toBe(true);
     }
+  });
+
+  it("keeps an offline tap unlabeled as Demo Mode even when DEMO_MODE=true", async () => {
+    vi.stubEnv("DEMO_MODE", "true");
+    const response = await createAssessment(
+      jsonRequest({ learnerId: ANA, passageId: PRIMARY, language: "fil", inputMode: "tap" }),
+    );
+    expect(response.status).toBe(201);
+    const body = await response.json();
+    expect(body.demoTranscript).toBe(false);
+    expect(row(body.id)).toMatchObject({ input_mode: "tap", demo_transcript: false, status: "recording" });
+  });
+
+  it("refuses to mix an offline tap with a prepared transcript", async () => {
+    const response = await createAssessment(
+      jsonRequest({ learnerId: ANA, passageId: PRIMARY, language: "fil", inputMode: "tap", useFixture: true }),
+    );
+    expect(response.status).toBe(400);
+    expect(tables.assessments).toHaveLength(0);
   });
 
   it("refuses Demo Mode for a passage with no fixture", async () => {
@@ -523,5 +545,50 @@ describe("POST /api/assessments/[id]/confirm", () => {
     );
     expect(response.status).toBe(409);
     expect(row(id).accuracy_percent).toBeNull();
+  });
+});
+
+describe("POST /api/assessments/[id]/tap", () => {
+  it("saves the marked transcript without scoring it", async () => {
+    const created = await createAssessment(
+      jsonRequest({ learnerId: ANA, passageId: PRIMARY, language: "fil", inputMode: "tap" }),
+    );
+    const id = (await created.json()).id as string;
+    const response = await saveTap(
+      jsonRequest({
+        transcript: "maagang gumising si ana para tulungan ang kanyang ina",
+        durationSeconds: 18.5,
+      }),
+      context(id),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ status: "review", durationSeconds: 18.5 });
+    expect(row(id)).toMatchObject({
+      status: "review",
+      input_mode: "tap",
+      demo_transcript: false,
+      accuracy_percent: null,
+      duration_seconds: 18.5,
+    });
+  });
+
+  it("rejects a tap upload on a recording assessment", async () => {
+    const id = insertAssessment({ passage_id: PRIMARY, language: "fil", input_mode: "speech" });
+    const response = await saveTap(
+      jsonRequest({ transcript: "maagang gumising", durationSeconds: 10 }),
+      context(id),
+    );
+    expect(response.status).toBe(409);
+    expect(row(id).transcript).toBeNull();
+  });
+
+  it("rejects a tap that never started the timer", async () => {
+    const id = insertAssessment({ passage_id: PRIMARY, language: "fil", input_mode: "tap" });
+    const response = await saveTap(
+      jsonRequest({ transcript: "maagang gumising", durationSeconds: 0 }),
+      context(id),
+    );
+    expect(response.status).toBe(422);
+    expect(row(id).status).toBe("recording");
   });
 });

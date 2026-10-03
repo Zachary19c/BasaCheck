@@ -1,6 +1,7 @@
 import type {
   AssessmentRow,
   AssessmentStatus,
+  InputMode,
   InterventionId,
   SupportedLanguage,
   SupportArea,
@@ -20,6 +21,7 @@ export type AssessmentDatabaseRow = {
   transcript_verified_at: string | null;
   demo_transcript: boolean;
   seeded_demo: boolean;
+  input_mode?: InputMode;
   duration_seconds: DatabaseNumeric | null;
   accuracy_percent: DatabaseNumeric | null;
   wpm: DatabaseNumeric | null;
@@ -61,6 +63,7 @@ export function mapAssessmentFromDatabase(
     transcriptVerifiedAt: row.transcript_verified_at,
     demoTranscript: row.demo_transcript,
     seededDemo: row.seeded_demo,
+    inputMode: row.input_mode === "tap" ? "tap" : "speech",
     durationSeconds: mapNullableNumber(row.duration_seconds, "duration_seconds"),
     accuracyPercent: mapNullableNumber(row.accuracy_percent, "accuracy_percent"),
     wpm: mapNullableNumber(row.wpm, "wpm"),
@@ -92,6 +95,7 @@ export function mapAssessmentToDatabase(
     transcript_verified_at: row.transcriptVerifiedAt,
     demo_transcript: row.demoTranscript,
     seeded_demo: row.seededDemo,
+    input_mode: row.inputMode,
     duration_seconds: row.durationSeconds,
     accuracy_percent: row.accuracyPercent,
     wpm: row.wpm,

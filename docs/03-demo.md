@@ -5,8 +5,8 @@ One story: fictional Ana, Grade 2. Show Filipino as the main example while brief
 ## Setup
 
 - Seeded teacher, Ana, four passages, twelve reviewed questions, linked illustrative follow-up.
-- Phone-width browser on localhost or HTTPS; verify microphone access before judging.
-- Know whether live speech or Demo Mode is active; never hide the banner.
+- Phone-width browser on localhost or HTTPS; verify microphone access before judging. If the mic is unavailable, use **Mark words offline** and say so.
+- Know whether live speech, Demo Mode, or Offline tap is active; never hide the label.
 - Keep labeled progress view open in a backup tab. Preserve the follow-up row.
 
 ## Script
@@ -21,9 +21,9 @@ One story: fictional Ana, Grade 2. Show Filipino as the main example while brief
 
 ### 0:40–1:50 — Assess and verify
 
-Show both language options, select Filipino and **Si Ana at ang Ina**, then record. Deliberately say `para` instead of `upang`. With a fixture, announce Demo Mode before presenting results.
+Show both language options, select Filipino and **Si Ana at ang Ina**, then record. Deliberately say `para` instead of `upang`. With a fixture, announce Demo Mode before presenting results. To show offline tap instead, tap `upang`, type `para`, and finish the timer. Say that the teacher marked the word and no recording was made.
 
-“Speech recognition proposes a transcript. The teacher confirms what the learner actually said before our code scores it.”
+“Speech recognition proposes a transcript. The teacher confirms what the learner actually said before our code scores it. Offline tap skips recognition: the marks are the transcript, and the teacher still confirms them.”
 
 Show the review field. Preserve the intended spoken difference; correct only recognition mistakes. Confirm. Answer questions wrong, wrong, right for 1/3 comprehension. A live transcript may differ from the fixture; describe actual computed results rather than promising a specific percentage.
 
@@ -53,6 +53,6 @@ Compare the same learner, language and passage. Same-passage practice can affect
 
 ## Backup
 
-If speech fails, show the error and explicitly choose Demo Mode. Say: “We are using a prepared transcript matched to this passage; the same scoring engine runs after teacher confirmation.” If recording cannot start, use the labeled stored demo baseline and linked seeded follow-up. Do not claim live model processing.
+If speech fails, show the error and explicitly choose Demo Mode. Say: “We are using a prepared transcript matched to this passage; the same scoring engine runs after teacher confirmation.” If recording cannot start, either mark the words offline or use the labeled stored demo baseline and linked seeded follow-up. Do not call a tap check Demo Mode, and do not claim live model processing.
 
-Avoid diagnosis claims, WPM good/bad labels, claims of proven intervention effectiveness, invented scores, or claims that audio is never handled. Say: “Audio is processed temporarily and is not retained in the database after transcription.”
+Avoid diagnosis claims, WPM good/bad labels, claims of proven intervention effectiveness, or invented scores. For a recording, say: “Audio is processed temporarily and is not retained in the database after transcription.” For a tap, say: “No audio was recorded. The teacher marked the missed words, and saving the check still used the server.”

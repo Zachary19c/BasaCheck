@@ -8,6 +8,7 @@ type TranscriptReviewProps = {
   originalTranscript: string;
   initialDraft: string;
   demoTranscript: boolean;
+  offlineTap?: boolean;
   // Resolves to an error message, or null when the transcript was confirmed.
   onConfirm: (verifiedTranscript: string) => Promise<string | null>;
   onRecordAgain: () => void;
@@ -19,6 +20,7 @@ export function TranscriptReview({
   originalTranscript,
   initialDraft,
   demoTranscript,
+  offlineTap = false,
   onConfirm,
   onRecordAgain,
 }: TranscriptReviewProps) {
@@ -40,15 +42,20 @@ export function TranscriptReview({
         <h2 id="review-heading" className="text-lg font-bold">
           Check the transcript
         </h2>
+        {offlineTap && (
+          <p className="inline-block rounded bg-teal-100 px-2 py-0.5 text-sm font-semibold text-teal-900">
+            Offline tap · teacher-marked words
+          </p>
+        )}
         {demoTranscript && (
           <p className="inline-block rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900">
             Demo Mode · prepared transcript
           </p>
         )}
         <p className="text-sm text-neutral-700">
-          Make the spoken transcript match what the learner actually said. Fix speech-recognition
-          mistakes only, and keep the learner&apos;s real differences from the passage. If you
-          cannot tell what was said, record again.
+          {offlineTap
+            ? "This text comes from the words you marked. Change it if a tap does not match what the learner said."
+            : "Make the spoken transcript match what the learner actually said. Fix speech-recognition mistakes only, and keep the learner's real differences from the passage. If you cannot tell what was said, record again."}
         </p>
       </div>
 
@@ -59,7 +66,11 @@ export function TranscriptReview({
 
       <div>
         <h3 className="text-sm font-semibold">
-          {demoTranscript ? "Prepared transcript" : "Original transcript (speech recognition)"}
+          {offlineTap
+            ? "Marked transcript"
+            : demoTranscript
+              ? "Prepared transcript"
+              : "Original transcript (speech recognition)"}
         </h3>
         <p className="mt-1 rounded-lg bg-neutral-100 p-3">{originalTranscript}</p>
       </div>
@@ -100,7 +111,7 @@ export function TranscriptReview({
           disabled={busy}
           className="min-h-12 rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Record again
+          {offlineTap ? "Mark words again" : "Record again"}
         </button>
       </div>
     </section>

@@ -15,6 +15,7 @@ type AssessmentForAudio = {
   language: SupportedLanguage;
   status: string;
   demo_transcript: boolean;
+  input_mode?: string;
 };
 
 // Turns a recording into the original transcript and moves the assessment to
@@ -31,13 +32,16 @@ export async function POST(
   const supabase = createClient();
   const { data, error } = await supabase
     .from("assessments")
-    .select("id, passage_id, language, status, demo_transcript")
+    .select("id, passage_id, language, status, demo_transcript, input_mode")
     .eq("id", id)
     .maybeSingle();
   if (error) return apiError(500, "database_error", "Could not load the assessment.");
   if (!data) return apiError(404, "assessment_not_found", "Assessment not found.");
 
   const assessment = data as AssessmentForAudio;
+  if (assessment.input_mode === "tap") {
+    return apiError(409, "invalid_status", "This assessment is an offline tap. Mark the words instead of uploading audio.");
+  }
   if (assessment.status !== "recording") {
     return apiError(
       409,

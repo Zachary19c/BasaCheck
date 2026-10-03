@@ -5,9 +5,9 @@ Freeze shared contracts in the first 30 minutes. Integrate by hour 8. `01-mvp-pr
 | Member | Ownership | Done when |
 | --- | --- | --- |
 | 1 | Teacher shell + seeded content | Ana dashboard, schema/RLS lockdown, four passages and twelve questions |
-| 2 | Assessment + speech + transcript review | Language/passage selectors, recording, speech integration, confirmation gate and error states |
-| 3 | Reading engine + fixtures | Deterministic alignment/metrics/support functions, matching fixtures, meaningful scoring tests |
-| 4 | Questions + results + progress | Passage-specific questions, server scoring, intervention save, labeled linked comparison |
+| 2 | Assessment + speech + transcript review | Language/passage selectors, recording, offline tap, speech integration, confirmation gate and error states |
+| 3 | Reading engine + fixtures | Deterministic alignment/metrics/support functions, tap transcript builder, matching fixtures, meaningful scoring tests |
+| 4 | Questions + results + progress | Passage-specific questions, server scoring, intervention save, labeled linked comparison including Offline tap |
 
 ## Member 1 — Teacher shell and content
 
@@ -17,7 +17,7 @@ Hour 1 exit: usable dashboard; publish content IDs and schema contract. Apply co
 
 ## Member 2 — Assessment, recorder and verification
 
-Own assessment page, Recorder and TranscriptReview components, create/audio/confirm routes, and Python speech service. Select language then filter active passages. Lock selection when recording starts. Pass stored language to speech (`fil → tl`, `en → en`). Audio route saves transcript and enters review; **only confirm route calls scoreReading** using teacher-verified text. Handle invalid duration, empty text, microphone permissions, request failure, and cleanup. Do not silently substitute fixtures on live failure.
+Own assessment page, Recorder, TapPassage, and TranscriptReview components, create/audio/tap/confirm routes, and Python speech service. Select language then filter active passages. Lock selection when the check starts. Pass stored language to speech (`fil → tl`, `en → en`). Audio route saves a speech transcript and enters review. Tap route saves a teacher-marked transcript and timer duration, sets `input_mode = tap`, and does not call the speech service. **Only confirm route calls scoreReading** using teacher-verified text. Handle invalid duration, empty text, microphone permissions, request failure, and cleanup. Do not silently substitute fixtures on live failure, and do not label a tap as Demo Mode.
 
 Member 4 supplies the question component mounted on this page after confirmation; avoid two people editing its layout simultaneously. Member 3 supplies scoreReading and fixtures.
 
@@ -25,7 +25,7 @@ Hour 1 exit: capture test audio; return live or explicitly labeled fixture respo
 
 ## Member 3 — Engine and fixtures
 
-Own `lib/reading/{normalize,align,metrics,support}.ts`, `fixture-fil.ts`, `fixture-en.ts`, and scoring tests. Agree deterministic alignment tie-breaks. Export `scoreReading({expectedText, transcript, durationSeconds})`, and `supportArea(accuracyPercent, comprehensionPercent)` returning accuracy/comprehension/null. Never use WPM to classify support.
+Own `lib/reading/{normalize,align,metrics,support,taps}.ts`, `fixture-fil.ts`, `fixture-en.ts`, and scoring tests. Agree deterministic alignment tie-breaks. Export `scoreReading({expectedText, transcript, durationSeconds})`, `transcriptFromTaps`, and `supportArea(accuracyPercent, comprehensionPercent)` returning accuracy/comprehension/null. Never use WPM to classify support. `transcriptFromTaps` keeps unmarked words, omits a blank mark, and normalizes a typed replacement.
 
 Fixtures are keyed by passage ID, with their own duration and language, for all four passages. Seed scripts and fixture generation use the same token counting. Help Member 4 render word differences after the engine is stable.
 
@@ -43,7 +43,7 @@ Hour 1 exit: importable function signatures and a working primary fixture.
 
 Own QuestionBlock, results page, progress content, answers/intervention routes, and bilingual static card copy. Fetch questions for selected passage without answer keys. Server validates three answers and transcript confirmation, calculates comprehension/support, then completes the row. Render **Passage Reading Accuracy**, **Reading Rate**, **Comprehension**. Suggestions are demo rules and nullable; teacher chooses any card, including repeated reading.
 
-Show Demo Mode/Seeded demo assessment provenance on results and progress. Use explicit baseline/follow-up IDs with matching learner/language/passage; do not automatically pair the newest live run with an unrelated follow-up. Saving an intervention does not create a follow-up or fabricate results.
+Show Demo Mode, Seeded demo, and Offline tap provenance on results and progress. Use explicit baseline/follow-up IDs with matching learner/language/passage; do not automatically pair the newest live run with an unrelated follow-up. Saving an intervention does not create a follow-up or fabricate results.
 
 Hour 1 exit: results/progress render from agreed mock contract; switch to real seed when Member 1 supplies it.
 
@@ -68,6 +68,7 @@ type AssessmentRow = {
   transcriptVerifiedAt: string | null
   demoTranscript: boolean
   seededDemo: boolean
+  inputMode: "speech" | "tap"
   durationSeconds: number | null
   accuracyPercent: number | null
   wpm: number | null
@@ -82,7 +83,7 @@ type AssessmentRow = {
 }
 ```
 
-Member 1 supplies snake_case database ↔ camelCase mapping. Member 2 owns create/audio/confirm; Member 4 owns answers/intervention. Each route uses the server-only Supabase client and validates IDs and status transitions.
+Member 1 supplies snake_case database ↔ camelCase mapping. Member 2 owns create/audio/tap/confirm; Member 4 owns answers/intervention. Each route uses the server-only Supabase client and validates IDs and status transitions. Apply `20261003191703_offline_tap_mode.sql` so `input_mode` exists.
 
 ## Twelve-hour clock
 
@@ -91,7 +92,7 @@ Member 1 supplies snake_case database ↔ camelCase mapping. Member 2 owns creat
 | 0–0.5 | Freeze contracts, content IDs, file ownership, env and presenter |
 | 0.5–2 | Schema/content seed; model download; fixture engine and page mocks |
 | 2–6 | Build owned slices; transcript review, bilingual content, engine tests |
-| 6–8 | Connect audio → review → confirm → engine → answers → complete |
+| 6–8 | Connect audio or offline tap → review → confirm → engine → answers → complete |
 | 8–10 | End-to-end both languages, intervention/progress, failures and input validation |
 | 10–11 | Phone layout, provenance labels, seeded follow-up preservation |
 | 11–12 | Rehearse four-minute demo twice; freeze features |

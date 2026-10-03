@@ -18,6 +18,7 @@ const mockBaseline: AssessmentRow = {
   transcriptVerifiedAt: "2026-10-03T08:00:00.000Z",
   demoTranscript: true,
   seededDemo: true,
+  inputMode: "speech",
   durationSeconds: 20,
   accuracyPercent: 84.2,
   wpm: 57,

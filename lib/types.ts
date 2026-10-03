@@ -12,6 +12,9 @@ export type AssessmentStatus =
   | "complete"
   | "error";
 
+// speech: microphone or a prepared fixture. tap: teacher-marked words, no recording.
+export type InputMode = "speech" | "tap";
+
 export type InterventionId = "main-idea" | "word-practice" | "repeated-reading";
 
 export type WordEvent = {
@@ -31,6 +34,7 @@ export type AssessmentRow = {
   transcriptVerifiedAt: string | null;
   demoTranscript: boolean;
   seededDemo: boolean;
+  inputMode: InputMode;
   durationSeconds: number | null;
   accuracyPercent: number | null;
   wpm: number | null;
