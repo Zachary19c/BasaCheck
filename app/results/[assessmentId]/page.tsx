@@ -162,14 +162,14 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
       )}
 
       <p className="text-sm text-neutral-600">
-        Progress compares a check only with the follow-up linked to it. Saving an activity does not
-        create that follow-up.
+        Saving an activity records the teacher&apos;s plan. Progress shows only checks that were
+        already linked; saving a plan does not create a follow-up or change any scores.
       </p>
       <Link
         href={`/progress/${assessment.learnerId}`}
         className="block min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
       >
-        View observed change
+        View learner progress
       </Link>
     </main>
   );
