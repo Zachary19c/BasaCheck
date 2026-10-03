@@ -65,6 +65,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
 
   const complete = assessment.status === "complete";
   const suggested = suggestedIntervention(assessment.supportArea);
+  const differences = assessment.wordEvents.filter((event) => event.type !== "match");
 
   return (
     <main className="mx-auto max-w-md space-y-6 px-4 py-6">
@@ -113,13 +114,13 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
         <h2 id="differences-heading" className="text-lg font-bold">
           Word differences
         </h2>
-        {assessment.wordEvents.length === 0 ? (
+        {differences.length === 0 ? (
           <p className="text-sm text-neutral-700">
-            Word differences appear when the reading engine returns them.
+            No word differences recorded.
           </p>
         ) : (
           <ul lang={assessment.language} className="flex flex-wrap gap-2">
-            {assessment.wordEvents.map((event, index) => (
+            {differences.map((event, index) => (
               <li
                 key={index}
                 className={`rounded-lg border px-2 py-1 text-sm ${EVENT_STYLES[event.type]}`}
@@ -152,20 +153,21 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
             language={assessment.language}
             suggested={suggested}
             chosen={assessment.interventionId}
+            learnerId={assessment.learnerId}
           />
         </section>
       )}
 
+      <p className="text-sm text-neutral-600">
+        Progress compares a check only with the follow-up linked to it. Saving an activity does not
+        create that follow-up.
+      </p>
       <Link
         href={`/progress/${assessment.learnerId}`}
         className="block min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
       >
         View observed change
       </Link>
-      <p className="text-sm text-neutral-600">
-        Progress compares a check only with the follow-up linked to it. Saving an activity does not
-        create that follow-up.
-      </p>
     </main>
   );
 }

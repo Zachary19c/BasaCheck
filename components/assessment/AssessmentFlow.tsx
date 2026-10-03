@@ -78,7 +78,7 @@ export function AssessmentFlow({
 
   const selected =
     passages.find((passage) => passage.id === passageId && passage.language === language) ?? null;
-  const locked = phase.name !== "setup" && phase.name !== "error";
+  const locked = active !== null || (phase.name !== "setup" && phase.name !== "error");
   const canUseFixture = selected !== null && fixturePassageIds.includes(selected.id);
 
   function changeLanguage(next: SupportedLanguage) {

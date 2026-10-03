@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ApiErrorBody } from "@/lib/assessment/contract";
 import { INTERVENTION_IDS, INTERVENTIONS } from "@/lib/interventions";
 import type { InterventionId, SupportedLanguage } from "@/lib/types";
@@ -13,6 +14,7 @@ type InterventionPickerProps = {
   language: SupportedLanguage;
   suggested: InterventionId | null;
   chosen: InterventionId | null;
+  learnerId: string;
 };
 
 export function InterventionPicker({
@@ -20,7 +22,9 @@ export function InterventionPicker({
   language,
   suggested,
   chosen: initialChosen,
+  learnerId,
 }: InterventionPickerProps) {
+  const router = useRouter();
   const [chosen, setChosen] = useState<InterventionId | null>(initialChosen);
   const [selected, setSelected] = useState<InterventionId | null>(initialChosen ?? suggested);
   const [saving, setSaving] = useState(false);
@@ -31,11 +35,14 @@ export function InterventionPicker({
     if (!selected || saving) return;
     setSaving(true);
     setError(null);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`/api/assessments/${assessmentId}/intervention`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ interventionId: selected }),
+        signal: controller.signal,
       });
       const body: unknown = await response.json().catch(() => null);
       if (!response.ok) {
@@ -45,11 +52,18 @@ export function InterventionPicker({
         );
       } else {
         setChosen((body as { interventionId: InterventionId }).interventionId);
+        router.push(`/progress/${learnerId}`);
       }
-    } catch {
-      setError("Could not reach the BasaCheck server. Try again.");
+    } catch (cause) {
+      setError(
+        cause instanceof Error && cause.name === "AbortError"
+          ? "Saving took too long. Check your connection and try again."
+          : "Could not reach the BasaCheck server. Try again.",
+      );
+    } finally {
+      window.clearTimeout(timeout);
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   return (
@@ -108,7 +122,6 @@ export function InterventionPicker({
       <p role="status" aria-live="polite" className="text-sm text-neutral-700">
         {chosen ? `Chosen activity: ${INTERVENTIONS[chosen].title[language]}` : "No activity saved yet."}
       </p>
-
       <button
         type="submit"
         disabled={!selected || saving || selected === chosen}
