@@ -60,17 +60,20 @@ export function matchLive(expected: string[], heard: string[], settled = heard.l
       status[next - 1] = "correct";
       return;
     }
-    if (!final || next >= expected.length || isFragment(word, expected[next])) return;
+    if (next >= expected.length || isFragment(word, expected[next])) return;
 
-    // Skipped ahead: the words in between were missed.
+    // Skipped ahead. Final words mark the words in between red; words still
+    // being recognized leave them pending, so one misheard word never stops
+    // the rest of the reading from turning green.
     for (let ahead = next + 1; ahead <= Math.min(next + LOOKAHEAD, expected.length - 1); ahead += 1) {
       if (wordsMatch(word, expected[ahead])) {
-        for (let missed = next; missed < ahead; missed += 1) status[missed] = "wrong";
+        if (final) for (let missed = next; missed < ahead; missed += 1) status[missed] = "wrong";
         status[ahead] = "correct";
         next = ahead + 1;
         return;
       }
     }
+    if (!final) return;
     // A different word in place of the expected one.
     status[next] = "wrong";
     next += 1;

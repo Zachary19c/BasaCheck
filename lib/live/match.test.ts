@@ -49,6 +49,18 @@ describe("live practice matching", () => {
     expect(result.status.slice(0, 2)).toEqual(["correct", "pending"]);
   });
 
+  it("keeps turning words green past a misheard word that is not final yet", () => {
+    // Chrome can keep a whole sentence unconfirmed while the learner reads.
+    const result = run("Maagang kumain si Ana upang", 0);
+    expect(result.status.slice(0, 5)).toEqual(["correct", "pending", "correct", "correct", "correct"]);
+    expect(result.next).toBe(5);
+  });
+
+  it("marks the skipped word red once the words are final", () => {
+    const result = run("Maagang kumain si Ana upang");
+    expect(result.status.slice(0, 5)).toEqual(["correct", "wrong", "correct", "correct", "correct"]);
+  });
+
   it("allows small recognition spelling differences in longer words", () => {
     expect(wordsMatch("tulungan", "tulongan")).toBe(true);
     expect(wordsMatch("ina", "ana")).toBe(false);
