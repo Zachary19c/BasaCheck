@@ -14,21 +14,21 @@ export const FIL_SECOND_PASSAGE_ID = PASSAGE_IDS.siBenAtAngAso;
 
 export const FIL_FIXTURES: Readonly<Record<string, ReadingFixture>> = {
   // Si Ana at ang Ina. Only "upang" is read as "para":
-  // 60 tokens, 59/60 matches, 60 tokens in 60 s = 60 WPM.
+  // 33 tokens, 32/33 matches, 33 tokens in 33 s = 60 WPM.
   [FIL_PRIMARY_PASSAGE_ID]: {
     passageId: FIL_PRIMARY_PASSAGE_ID,
     language: "fil",
     transcript:
-      "Maagang gumising si Ana para tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.",
-    durationSeconds: 60,
+      "Maagang gumising si Ana para tulungan ang kanyang ina. Nagluto sila ng almusal. Pagkatapos kumain, naghugas si Ana ng mga plato at pinunasan ang mesa. Niyakap niya ang ina bago pumasok sa paaralan.",
+    durationSeconds: 33,
   },
-  // Si Ben at ang Aso. Read as written. 51 tokens in 51 s = 60 WPM.
+  // Si Ben at ang Aso. Read as written. 35 tokens in 35 s = 60 WPM.
   [FIL_SECOND_PASSAGE_ID]: {
     passageId: FIL_SECOND_PASSAGE_ID,
     language: "fil",
     transcript:
-      "Si Ben ay may maliit na aso. Tuwing hapon, naglalaro sila sa bakuran. Tumakbo ang aso at hinabol ang bola. Tumawa si Ben habang tumatakbo. Pagkatapos maglaro, binigyan ni Ben ang aso ng malinis na tubig. Natulog ang aso sa tabi ni Ben. Mahal na mahal ni Ben ang kanyang aso.",
-    durationSeconds: 51,
+      "May maliit na aso si Ben. Tuwing hapon, naglalaro sila ng bola sa bakuran. Pagkatapos maglaro, binibigyan ni Ben ng malinis na tubig ang aso. Natutulog ito sa tabi niya. Mahal ni Ben ang aso.",
+    durationSeconds: 35,
   },
   [PASSAGE_IDS.angPayongNiRosa]: {
     passageId: PASSAGE_IDS.angPayongNiRosa,
@@ -48,8 +48,8 @@ export const FIL_FIXTURES: Readonly<Record<string, ReadingFixture>> = {
     passageId: PASSAGE_IDS.angGampaninNgBarangay,
     language: "fil",
     transcript:
-      "Ang barangay ang pinakamaliit na yunit ng pamahalaan sa Pilipinas. Dito unang naririnig ang mga hinaing ng mga mamamayan. Ang punong barangay at ang mga kagawad ang nangunguna sa pagpapanatili ng kaayusan, sa pagtulong kapag may sakuna, at sa pag-aayos ng maliliit na alitan. May tungkulin din ang barangay na magbantay sa kalinisan ng mga daan at estero. Hindi lamang ang mga pinuno ang may gawain. Ang mga residente ay maaaring sumali sa pulong, mag-ulat ng panganib, at tumulong sa paglilinis. Kapag aktibo ang mga tao, mas mabilis na nalulutas ang suliranin sa kanilang lugar. Kaya ang barangay ay hindi lamang isang opisina. Ito ay isang pamayanan na nagkakaisa. Sa pulong ng barangay, maaaring magmungkahi ang kabataan ng proyektong pangkalinisan. Ang boses nila ay bahagi ng desisyon ng pamayanan.",
-    durationSeconds: 129,
+      "Ang barangay ang pinakamaliit na yunit ng pamahalaan sa Pilipinas. Dito unang naririnig ang mga hinaing ng mga mamamayan. Ang punong barangay at ang mga kagawad ang nangunguna sa pagpapanatili ng kaayusan, sa pagtulong kapag may sakuna, at sa pag-aayos ng maliliit na alitan. May tungkulin din ang barangay na magbantay sa kalinisan ng mga daan at estero. Hindi lamang ang mga pinuno ang may gawain. Ang mga residente ay maaaring sumali sa pulong, mag-ulat ng panganib, at tumulong sa paglilinis. Kapag aktibo ang mga tao, mas mabilis na nalulutas ang suliranin sa kanilang lugar. Kaya ang barangay ay hindi lamang isang opisina. Ito ay isang pamayanan na nagkakaisa. Sa pulong ng barangay, maaaring magmungkahi ang kabataan ng proyektong pangkalinisan. Ang boses nila ay bahagi ng desisyon ng pamayanan. Bawat isa ay may pananagutan.",
+    durationSeconds: 134,
   },
   [PASSAGE_IDS.angKagubatanNgBayan]: {
     passageId: PASSAGE_IDS.angKagubatanNgBayan,

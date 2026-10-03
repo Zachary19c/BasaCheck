@@ -46,7 +46,7 @@ Primary user: a teacher using a mobile-friendly browser. Fictional learners: **A
 
 Choose learner → choose language/passage → record and transcribe, or mark words offline → teacher verifies transcript → score reading → answer three questions → score comprehension → review results → select intervention → compare follow-up.
 
-Transcript review includes the expected passage, the original transcript, an editable spoken transcript, and **Confirm transcript**. Correct mistakes so the text matches what the learner actually said; do not rewrite it to match the passage. Confirmation is required for a recording, a prepared fixture, and an offline tap. Audio is released after transcription; replay is outside this MVP. If the teacher cannot verify a recording, record again. If a tap does not match what was said, mark the words again.
+Transcript review includes the expected passage, replay of a live recording, the recognized transcript, an editable spoken transcript, and **Confirm transcript**. Correct mistakes so the text matches what the learner actually said; do not rewrite it to match the passage. Confirmation is required for a recording, a prepared fixture, and an offline tap. Live audio stays in browser memory for review and is released when the assessment screen closes. If the teacher cannot verify a recording, record again. If a tap does not match what was said, mark the words again.
 
 ### Offline tap
 
