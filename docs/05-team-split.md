@@ -4,16 +4,16 @@ Freeze shared contracts in the first 30 minutes. Integrate by hour 8. `01-mvp-pr
 
 | Member | Ownership | Done when |
 | --- | --- | --- |
-| 1 | Teacher shell + seeded content | Login, Ana dashboard, schema/RLS, four passages and twelve questions |
+| 1 | Teacher shell + seeded content | Ana dashboard, schema/RLS lockdown, four passages and twelve questions |
 | 2 | Assessment + speech + transcript review | Language/passage selectors, recording, speech integration, confirmation gate and error states |
 | 3 | Reading engine + fixtures | Deterministic alignment/metrics/support functions, matching fixtures, meaningful scoring tests |
 | 4 | Questions + results + progress | Passage-specific questions, server scoring, intervention save, labeled linked comparison |
 
 ## Member 1 — Teacher shell and content
 
-Own `app/login`, `app/dashboard`, protected layout, Supabase clients, migration and seed. Own progress route shell; Member 4 owns its content. Seed Ana, two Filipino/two English original passages, three reviewed questions each, and one illustrative follow-up. Compute word counts through Member 3's normalizer; do not reuse the old 17-word count. Implement ownership policies and keep answer keys inaccessible to browser clients. Coordinate bilingual question/card review with Member 4.
+Own `app/dashboard`, the app layout, the server-only Supabase client, migration and seed. No login screen. Own progress route shell; Member 4 owns its content. Seed Ana, two Filipino/two English original passages, three reviewed questions each, and one illustrative follow-up. Compute word counts through Member 3's normalizer; do not reuse the old 17-word count. Keep RLS on with no browser grants and keep answer keys inaccessible to browser clients. Coordinate bilingual question/card review with Member 4.
 
-Hour 1 exit: usable seeded login and dashboard; publish content IDs and schema contract. Apply completed content seed by hour 2. No passage-authoring interface.
+Hour 1 exit: usable dashboard; publish content IDs and schema contract. Apply completed content seed by hour 2. No passage-authoring interface.
 
 ## Member 2 — Assessment, recorder and verification
 
@@ -82,17 +82,17 @@ type AssessmentRow = {
 }
 ```
 
-Member 1 supplies snake_case database ↔ camelCase mapping. Member 2 owns create/audio/confirm; Member 4 owns answers/intervention. Each route checks auth/ownership.
+Member 1 supplies snake_case database ↔ camelCase mapping. Member 2 owns create/audio/confirm; Member 4 owns answers/intervention. Each route uses the server-only Supabase client and validates IDs and status transitions.
 
 ## Twelve-hour clock
 
 | Hours | Deliverable |
 | --- | --- |
 | 0–0.5 | Freeze contracts, content IDs, file ownership, env and presenter |
-| 0.5–2 | Login/schema/content seed; model download; fixture engine and page mocks |
+| 0.5–2 | Schema/content seed; model download; fixture engine and page mocks |
 | 2–6 | Build owned slices; transcript review, bilingual content, engine tests |
 | 6–8 | Connect audio → review → confirm → engine → answers → complete |
-| 8–10 | End-to-end both languages, intervention/progress, failures and ownership |
+| 8–10 | End-to-end both languages, intervention/progress, failures and input validation |
 | 10–11 | Phone layout, provenance labels, seeded follow-up preservation |
 | 11–12 | Rehearse four-minute demo twice; freeze features |
 

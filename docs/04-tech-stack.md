@@ -8,7 +8,7 @@ Locked for four people and 12 hours. `01-mvp-prd.md` is the scope authority.
 | --- | --- |
 | App/API | Next.js, React, TypeScript |
 | Styling | Tailwind CSS, phone-width layout |
-| Database/auth | Supabase PostgreSQL, Auth, RLS |
+| Database | Supabase PostgreSQL (RLS on, server-only access; no Auth/login) |
 | Recording | Browser MediaRecorder |
 | Speech | Local Python service, faster-whisper multilingual `base` or `small` |
 | Measurements | Deterministic TypeScript in `lib/reading` |
@@ -18,7 +18,7 @@ No Gemini, WhisperX, phoneme models, or generated intervention content. Confirm 
 
 ## Speech contract
 
-Authenticated `POST /api/assessments/[id]/audio` forwards multipart audio and assessment language to local `POST /transcribe`.
+Server route `POST /api/assessments/[id]/audio` forwards multipart audio and assessment language to local `POST /transcribe`.
 
 Application language codes: `fil | en`. Map `fil → tl`, `en → en` for faster-whisper. Use a multilingual model, not an English-only `.en` model. Read the language from the stored passage/assessment; reject inconsistent client parameters.
 
@@ -57,7 +57,7 @@ Support: comprehension < 60 → comprehension; else accuracy < 90 → accuracy; 
 
 ```text
 learners
-  id, teacher_id, display_name, grade_level
+  id, display_name, grade_level
 
 passages
   id, title, content, language, grade_level, difficulty,
@@ -77,30 +77,28 @@ assessments
 
 Constrain language to fil/en and status to recording/processing/review/complete/error. Support area is nullable accuracy/comprehension. Intervention IDs: main-idea, word-practice, repeated-reading; bilingual card copy lives in code. Passage IDs/languages must agree; enforce in server validation. Follow-up links must match learner, language, and passage. No raw-audio column or bucket.
 
-RLS covers SELECT, INSERT, UPDATE and DELETE on learner-owned data, including UPDATE WITH CHECK. Assessments inherit ownership through learners. Active passages may be read by authenticated teachers. Question fetch uses a server projection that excludes correct_index; do not grant client access to answer keys. Every route authenticates and checks ownership, particularly if using the server service-role key, which bypasses RLS.
+No login. RLS is enabled on every table with no policies and no grants to `anon` or `authenticated`, so the browser cannot touch the database. All reads and writes go through Next.js server routes using `lib/supabase/server.ts`, which uses the service-role key. That key bypasses RLS, so it must never reach the browser and routes must validate every input (IDs, status transitions, passage/language match). Question fetch uses the `passage_questions` projection that excludes correct_index; never return answer keys to the client. Anyone who can reach the app can use it: run locally with fictional data only.
 
 ## Fixtures and seeds
 
 `lib/reading/fixture-fil.ts` and `fixture-en.ts` export fixtures keyed by passage ID with transcript, language, and duration. All four passages need a fixture; check passage identity before scoring. Fixture mode still requires teacher confirmation.
 
-Seed one teacher, Ana, four original passages (two per language), twelve reviewed questions, and one completed illustrative follow-up for the primary Filipino passage. Follow-up has a confirmed transcript and metrics derived by the same engine, `seeded_demo=true`, and comprehension 3/3. Link it explicitly to the demo baseline for progress; never infer a pair merely from creation times. Preserve it when adding live runs. The primary passage has 19 normalized tokens; one substitution gives 18/19 accuracy, and 20 seconds gives 57 WPM.
+Seed Ana, four original passages (two per language), twelve reviewed questions, and one completed illustrative follow-up for the primary Filipino passage. Follow-up has a confirmed transcript and metrics derived by the same engine, `seeded_demo=true`, and comprehension 3/3. Link it explicitly to the demo baseline for progress; never infer a pair merely from creation times. Preserve it when adding live runs. The primary passage has 19 normalized tokens; one substitution gives 18/19 accuracy, and 20 seconds gives 57 WPM.
 
 `DEMO_MODE=true`: use matching fixture and label the assessment immediately. In live mode, speech failure returns an error; only explicit teacher selection starts a disclosed fixture assessment. No silent fallback.
 
 ## Environment and layout
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 SPEECH_SERVICE_URL=http://127.0.0.1:8000
 DEMO_MODE=true
 ```
 
-Commit only `.env.example`. Keep service-role key and speech calls server-side. Bind the speech service to localhost for the local demo.
+Commit only `.env.example`. Keep service-role key and speech calls server-side; no `NEXT_PUBLIC_` Supabase variables are needed because the browser never talks to Supabase. Bind the speech service to localhost for the local demo.
 
 ```text
-app/login/
 app/dashboard/
 app/assess/[learnerId]/
 app/results/[assessmentId]/

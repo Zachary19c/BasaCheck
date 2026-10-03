@@ -1,70 +1,9 @@
--- Demo login: teacher@basacheck.local / basacheck-demo
+-- No login. Ana is seeded directly; there is no teacher account.
 -- Passage IDs are stable so speech fixtures can key off them.
 --   fil  Si Ana at ang Ina   10000000-0000-4000-8000-000000000001
 --   fil  Si Ben at ang Aso   10000000-0000-4000-8000-000000000002
 --   en   Maya and the Seed   10000000-0000-4000-8000-000000000003
 --   en   Leo's Red Ball      10000000-0000-4000-8000-000000000004
-
-insert into auth.users (
-  instance_id,
-  id,
-  aud,
-  role,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  created_at,
-  updated_at,
-  confirmation_token,
-  email_change,
-  email_change_token_new,
-  recovery_token
-)
-values (
-  '00000000-0000-0000-0000-000000000000',
-  '11111111-1111-4111-8111-111111111111',
-  'authenticated',
-  'authenticated',
-  'teacher@basacheck.local',
-  extensions.crypt('basacheck-demo', extensions.gen_salt('bf')),
-  now(),
-  '{"provider":"email","providers":["email"]}'::jsonb,
-  '{}'::jsonb,
-  now(),
-  now(),
-  '',
-  '',
-  '',
-  ''
-)
-on conflict (id) do nothing;
-
-insert into auth.identities (
-  id,
-  user_id,
-  provider_id,
-  identity_data,
-  provider,
-  last_sign_in_at,
-  created_at,
-  updated_at
-)
-values (
-  '11111111-1111-4111-8111-111111111111',
-  '11111111-1111-4111-8111-111111111111',
-  '11111111-1111-4111-8111-111111111111',
-  jsonb_build_object(
-    'sub', '11111111-1111-4111-8111-111111111111',
-    'email', 'teacher@basacheck.local'
-  ),
-  'email',
-  now(),
-  now(),
-  now()
-)
-on conflict (id) do nothing;
 
 with source (
   id,
@@ -239,10 +178,9 @@ values
   )
 on conflict (id) do nothing;
 
-insert into public.learners (id, teacher_id, display_name, grade_level)
+insert into public.learners (id, display_name, grade_level)
 values (
   '22222222-2222-4222-8222-222222222222',
-  '11111111-1111-4111-8111-111111111111',
   'Ana',
   2
 )

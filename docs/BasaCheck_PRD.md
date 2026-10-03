@@ -22,7 +22,7 @@ Primary user: an early-grade teacher using a mobile-friendly browser. Use only f
 
 ## Locked scope
 
-- Seeded teacher login and Ana's dashboard.
+- No login. The app opens directly on Ana's dashboard.
 - Filipino (default) and English selection inside the Assessment screen.
 - Four seeded, team-created passages: two per language, with three reviewed multiple-choice questions each.
 - One language and one selected passage per assessment. The teacher controls passage selection; changing language or passage after recording requires a new assessment.
@@ -32,11 +32,10 @@ Primary user: an early-grade teacher using a mobile-friendly browser. Use only f
 - Transparent demo support suggestions, three static intervention cards, and teacher selection.
 - Progress comparison with one seeded illustrative follow-up.
 
-## Five screens
+## Four screens
 
 | Screen | Job |
 | --- | --- |
-| Login | Seeded teacher account |
 | Dashboard | Ana, latest result, start assessment, progress link |
 | Assessment | Language + passage selection, record/stop, teacher transcript review, three questions |
 | Results | Measurements, word differences, demo suggestion, teacher intervention choice |
@@ -90,7 +89,7 @@ The seeded follow-up is illustrative data, visibly labeled **Seeded demo assessm
 
 ## Privacy and failure floor
 
-- Supabase Auth and ownership RLS protect learner/assessment data; server routes verify the signed-in teacher owns the assessment.
+- No login. All database reads and writes go through Next.js server routes using the server-only service-role key. RLS stays enabled with no browser grants, so the public anon key cannot read or write any table. Anyone who can reach the app can use it, so run it locally with fictional data only.
 - Question answer keys stay server-side, including during question fetch.
 - Audio is processed temporarily in memory or temporary files and is not retained in the database after transcription. Clean temporary files on success and failure; no public audio URL.
 - Failed speech processing leaves an error with no fabricated scores. Offer retry or an explicit Demo Mode choice using matching fixtures.
@@ -99,7 +98,7 @@ The seeded follow-up is illustrative data, visibly labeled **Seeded demo assessm
 
 ## Acceptance criteria
 
-The five-screen loop works at phone width for both languages; language filters passages/questions correctly; no reading scoring runs before transcript confirmation; a corrected transcript recomputes measurements; WPM never triggers a support suggestion; intervention choice persists; a failed transcription shows retry/demo choices; mismatched passage fixtures cannot be scored; seeded follow-up survives new recordings; ownership is enforced on reads and writes.
+The four-screen loop works at phone width for both languages; language filters passages/questions correctly; no reading scoring runs before transcript confirmation; a corrected transcript recomputes measurements; WPM never triggers a support suggestion; intervention choice persists; a failed transcription shows retry/demo choices; mismatched passage fixtures cannot be scored; seeded follow-up survives new recordings; the browser anon key cannot read or write any table.
 
 ## Out of scope
 

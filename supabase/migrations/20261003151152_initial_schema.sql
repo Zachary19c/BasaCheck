@@ -1,17 +1,17 @@
 -- BasaCheck 12-hour MVP schema.
--- Teachers own learners and assessments. Passages are seeded and read-only.
--- correct_index is not granted to browser roles.
+-- No login. The browser never talks to Supabase directly: all access goes
+-- through Next.js server routes using the service-role key. Browser roles
+-- (anon, authenticated) have no grants. Passages are seeded and read-only.
 
 create extension if not exists pgcrypto with schema extensions;
 
 create schema if not exists private;
 
 revoke all on schema private from public, anon, authenticated;
-grant usage on schema private to authenticated, service_role;
+grant usage on schema private to service_role;
 
 create table public.learners (
   id uuid primary key default gen_random_uuid(),
-  teacher_id uuid not null references auth.users (id) on delete cascade,
   display_name text not null,
   grade_level smallint not null,
   created_at timestamptz not null default now(),
@@ -163,8 +163,6 @@ create table public.assessments (
   )
 );
 
-create index learners_teacher_id_idx on public.learners (teacher_id);
-
 create index passages_language_active_idx
   on public.passages (language)
   where is_active;
@@ -178,10 +176,10 @@ create index assessments_baseline_idx
   on public.assessments (baseline_assessment_id);
 
 comment on table public.questions is
-  'Answer keys stay in correct_index. Browser roles can read the other columns only.';
+  'Answer keys stay in correct_index. Server routes must never return it to the browser.';
 
 comment on column public.questions.correct_index is
-  'Server-only. Not granted to anon or authenticated.';
+  'Server-only. Read questions for the client through passage_questions.';
 
 comment on column public.assessments.baseline_assessment_id is
   'Explicit follow-up link. Null on a first check. Must match learner, language, and passage.';
@@ -237,7 +235,7 @@ end;
 $$;
 
 revoke all on function private.enforce_assessment_consistency() from public;
-grant execute on function private.enforce_assessment_consistency() to authenticated, service_role;
+grant execute on function private.enforce_assessment_consistency() to service_role;
 
 create trigger assessments_enforce_consistency
   before insert or update on public.assessments
@@ -255,7 +253,7 @@ select
 from public.questions;
 
 comment on view public.passage_questions is
-  'Client read model for comprehension prompts. Excludes correct_index.';
+  'Server read model for comprehension prompts sent to the browser. Excludes correct_index.';
 
 alter table public.learners enable row level security;
 alter table public.passages enable row level security;
@@ -267,121 +265,14 @@ alter table public.passages force row level security;
 alter table public.questions force row level security;
 alter table public.assessments force row level security;
 
-create policy learners_select_own
-  on public.learners
-  for select
-  to authenticated
-  using (teacher_id = (select auth.uid()));
-
-create policy learners_insert_own
-  on public.learners
-  for insert
-  to authenticated
-  with check (teacher_id = (select auth.uid()));
-
-create policy learners_update_own
-  on public.learners
-  for update
-  to authenticated
-  using (teacher_id = (select auth.uid()))
-  with check (teacher_id = (select auth.uid()));
-
-create policy learners_delete_own
-  on public.learners
-  for delete
-  to authenticated
-  using (teacher_id = (select auth.uid()));
-
-create policy passages_select_active
-  on public.passages
-  for select
-  to authenticated
-  using (is_active and (select auth.uid()) is not null);
-
-create policy questions_select_active
-  on public.questions
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.passages
-      where passages.id = questions.passage_id
-        and passages.is_active
-    )
-  );
-
-create policy assessments_select_own
-  on public.assessments
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.learners
-      where learners.id = assessments.learner_id
-        and learners.teacher_id = (select auth.uid())
-    )
-  );
-
-create policy assessments_insert_own
-  on public.assessments
-  for insert
-  to authenticated
-  with check (
-    exists (
-      select 1
-      from public.learners
-      where learners.id = assessments.learner_id
-        and learners.teacher_id = (select auth.uid())
-    )
-  );
-
-create policy assessments_update_own
-  on public.assessments
-  for update
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.learners
-      where learners.id = assessments.learner_id
-        and learners.teacher_id = (select auth.uid())
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.learners
-      where learners.id = assessments.learner_id
-        and learners.teacher_id = (select auth.uid())
-    )
-  );
-
-create policy assessments_delete_own
-  on public.assessments
-  for delete
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.learners
-      where learners.id = assessments.learner_id
-        and learners.teacher_id = (select auth.uid())
-    )
-  );
+-- No login: RLS is on with no policies, and browser roles get no grants.
+-- Only the server (service_role, which bypasses RLS) can read or write.
 
 revoke all on table public.learners from anon, authenticated;
 revoke all on table public.passages from anon, authenticated;
 revoke all on table public.questions from anon, authenticated;
 revoke all on table public.assessments from anon, authenticated;
 revoke all on table public.passage_questions from anon, authenticated;
-
-grant select, insert, update, delete on table public.learners to authenticated;
-grant select on table public.passages to authenticated;
-grant select (id, passage_id, position, prompt, choices) on table public.questions to authenticated;
-grant select, insert, update, delete on table public.assessments to authenticated;
-grant select on table public.passage_questions to authenticated;
 
 grant all on table public.learners to service_role;
 grant all on table public.passages to service_role;
