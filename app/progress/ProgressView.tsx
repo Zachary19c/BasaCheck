@@ -21,6 +21,25 @@ type ProgressViewProps = {
   passageTitles: Record<string, string>;
 };
 
+function includesDemo(result: ComparisonResult) {
+  return (
+    result.baseline.seededDemo ||
+    result.baseline.demoTranscript ||
+    (result.kind !== "none" && (result.followUp.seededDemo || result.followUp.demoTranscript))
+  );
+}
+
+function realCheckFromMixedPair(result: ComparisonResult): ComparisonResult | null {
+  if (result.kind === "none" || !includesDemo(result)) return null;
+  const baselineIsReal = !result.baseline.seededDemo && !result.baseline.demoTranscript;
+  const followUpIsReal = !result.followUp.seededDemo && !result.followUp.demoTranscript;
+  if (result.kind === "pair" && baselineIsReal) {
+    return { kind: "none", baseline: result.baseline };
+  }
+  if (followUpIsReal) return { kind: "none", baseline: result.followUp };
+  return null;
+}
+
 function dateLabel(value: string) {
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(value),
@@ -76,6 +95,7 @@ function CheckSummary({ title, assessment }: { title: string; assessment: Assess
 }
 
 function ComparisonCard({ result, title }: { result: ComparisonResult; title: string }) {
+  const demo = includesDemo(result);
   return (
     <article className="panel h-full space-y-4 p-5">
       <p className="meta text-sm">
@@ -84,8 +104,14 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
       {result.kind === "pair" && (
         <>
-          <h3 className="text-lg font-semibold">Observed change after intervention</h3>
-          <p className="text-sm text-ink-2">{COMPARISON_NOTE}</p>
+          <h3 className="text-lg font-semibold">
+            {demo ? "Demo score example" : "Change between two checks"}
+          </h3>
+          <p className="text-sm text-ink-2">
+            {demo
+              ? "This comparison includes a sample transcript or preloaded example. These scores do not show this learner’s reading progress or what the chosen activity achieved."
+              : COMPARISON_NOTE}
+          </p>
           <ul className="space-y-1.5 rounded-xl bg-teal-wash/70 p-4 text-sm font-medium leading-relaxed tabular-nums text-teal-deep">
             {result.lines.map((line) => (
               <li key={line}>{line}</li>
@@ -112,7 +138,7 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
       {result.kind === "none" && (
         <>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
+          <CheckSummary title="Reading check" assessment={result.baseline} />
           <p className="text-sm text-ink-2">{NO_FOLLOW_UP_MESSAGE}</p>
         </>
       )}
@@ -122,31 +148,67 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
 export function ProgressView({ assessments, passageTitles }: ProgressViewProps) {
   const comparisons = buildComparisons(assessments);
+  const realComparisons = comparisons.flatMap((result) => {
+    if (!includesDemo(result)) return [result];
+    const realCheck = realCheckFromMixedPair(result);
+    return realCheck ? [realCheck] : [];
+  });
+  const demoComparisons = comparisons.filter(includesDemo);
+
+  function renderCard(result: ComparisonResult) {
+    return (
+      <ComparisonCard
+        key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
+        result={result}
+        title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
+      />
+    );
+  }
+
   // Linked pairs read across the page; single checks sit in a grid on wide screens.
-  const linked = comparisons.filter((result) => result.kind !== "none");
-  const single = comparisons.filter((result) => result.kind === "none");
-  const card = (result: ComparisonResult) => (
-    <ComparisonCard
-      key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
-      result={result}
-      title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
-    />
-  );
+  function renderList(results: ComparisonResult[]) {
+    const linked = results.filter((result) => result.kind !== "none");
+    const single = results.filter((result) => result.kind === "none");
+    return (
+      <>
+        {linked.map(renderCard)}
+        {single.length > 0 && (
+          <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">{single.map(renderCard)}</div>
+        )}
+      </>
+    );
+  }
 
   return (
-    <section aria-labelledby="progress-comparison-heading" className="space-y-4">
-      <h2 id="progress-comparison-heading" className="text-lg font-semibold">
-        Progress comparison
-      </h2>
-      {comparisons.length === 0 ? (
-        <p className="text-sm text-ink-2">No completed checks yet.</p>
-      ) : (
-        <>
-          {linked.map(card)}
-          {single.length > 0 && (
-            <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">{single.map(card)}</div>
-          )}
-        </>
+    <section aria-labelledby="progress-comparison-heading" className="space-y-6">
+      <div>
+        <h2 id="progress-comparison-heading" className="text-lg font-semibold">
+          Learner progress
+        </h2>
+        <p className="mt-1 text-sm text-ink-2">
+          Recorded readings and teacher-marked checks appear here. Demo scores are kept separately below.
+        </p>
+      </div>
+      <div className="space-y-4">
+        <h3 className="font-semibold">Real reading checks</h3>
+        {realComparisons.length === 0 ? (
+          <p className="note-dashed text-ink-2">
+            No real reading checks yet. Complete a learner recording or teacher-marked check to see progress here.
+          </p>
+        ) : (
+          renderList(realComparisons)
+        )}
+      </div>
+      {demoComparisons.length > 0 && (
+        <details className="group rounded-[14px] border border-dashed border-ink/40 bg-sheet/60 p-5">
+          <summary className="cursor-pointer font-semibold text-ink">
+            Demo and sample checks ({demoComparisons.length})
+          </summary>
+          <p className="mt-3 text-sm text-ink-2">
+            These use prepared transcripts or preloaded example scores. They are for exploring the app, not measuring this learner’s actual reading progress.
+          </p>
+          <div className="mt-4 space-y-4">{renderList(demoComparisons)}</div>
+        </details>
       )}
     </section>
   );

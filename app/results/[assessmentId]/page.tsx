@@ -201,7 +201,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
       {complete && (
         <section aria-labelledby="activity-heading" className="space-y-3">
           <h2 id="activity-heading" className="text-lg font-semibold">
-            Teacher activity
+            Recommended activity
           </h2>
           <p className="text-sm text-ink-2">
             {suggested
@@ -221,11 +221,11 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
 
       <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-ink-2 sm:max-w-xl">
-          Progress compares a check only with the follow-up linked to it. Saving an activity does
-          not create that follow-up.
+          Saving an activity records the teacher&apos;s plan. Progress shows only checks that were
+          already linked; saving a plan does not create a follow-up or change any scores.
         </p>
         <Link href={`/progress/${assessment.learnerId}`} className="btn btn-primary w-full sm:w-auto sm:shrink-0">
-          View observed change
+          View learner progress
           <ArrowRightIcon size={18} />
         </Link>
       </div>

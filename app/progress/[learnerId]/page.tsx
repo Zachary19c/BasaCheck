@@ -57,9 +57,6 @@ export default async function ProgressPage({
       <div data-progress-slot>
         <ProgressView assessments={assessments} passageTitles={passageTitles} />
       </div>
-      <p className="meta text-xs leading-5">
-        Seeded demo data is illustrative, not evidence of a real intervention.
-      </p>
     </main>
   );
 }

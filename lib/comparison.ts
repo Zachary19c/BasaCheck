@@ -8,7 +8,7 @@ export const COMPARISON_NOTE =
   "This compares the linked baseline and follow-up. It does not show that the activity caused the change.";
 export const MISMATCH_MESSAGE =
   "This follow-up is not linked. Learner, language, or passage does not match the baseline.";
-export const NO_FOLLOW_UP_MESSAGE = "No follow-up is linked to this check.";
+export const NO_FOLLOW_UP_MESSAGE = "No comparable follow-up is shown for this check yet.";
 
 const MINUS = "\u2212";
 
