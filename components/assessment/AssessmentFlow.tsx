@@ -18,7 +18,7 @@ import { HandIcon, SparkIcon } from "@/components/ui/icons";
 import { type PassageOption, PassagePicker } from "./PassagePicker";
 import { Recorder } from "./Recorder";
 import { TapPassage } from "./TapPassage";
-import { LivePractice } from "./LivePractice";
+import { LivePractice, LiveRecordingGuide } from "./LivePractice";
 import { TranscriptReview } from "./TranscriptReview";
 
 type ActiveAssessment = {
@@ -79,6 +79,8 @@ export function AssessmentFlow({
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
   // Live practice replaces the reading card controls until the teacher closes it.
   const [practicing, setPracticing] = useState(false);
+  // Color the passage live while a scored recording runs (a guide only).
+  const [liveColors, setLiveColors] = useState(true);
   const creatingRef = useRef(false);
   // Recorder callbacks finish after later renders, so they read the current assessment here.
   const activeRef = useRef<ActiveAssessment | null>(null);
@@ -311,6 +313,20 @@ export function AssessmentFlow({
                   <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
                 )}
                 {phase.name === "setup" && !practicing && (
+                  <label className="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
+                    <input
+                      type="checkbox"
+                      checked={liveColors}
+                      onChange={(event) => setLiveColors(event.target.checked)}
+                      className="mt-0.5 size-4 accent-teal"
+                    />
+                    <span>
+                      <span className="font-medium text-ink">Live colors while recording.</span> Words
+                      turn green as the learner reads. Uses the browser&apos;s speech service.
+                    </span>
+                  </label>
+                )}
+                {phase.name === "setup" && !practicing && (
                   <button
                     type="button"
                     onClick={() => setPracticing(true)}
@@ -334,6 +350,12 @@ export function AssessmentFlow({
                   content={selected.content}
                   language={selected.language}
                   onClose={() => setPracticing(false)}
+                />
+              ) : phase.name === "recording" && liveColors ? (
+                <LiveRecordingGuide
+                  key={selected.id}
+                  content={selected.content}
+                  language={selected.language}
                 />
               ) : (
                 <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
