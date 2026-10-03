@@ -2,3 +2,5 @@ fastapi==0.142.2
 uvicorn==0.54.0
 faster-whisper==1.2.1
 python-multipart==0.0.32
+# PyAV 19 removed av.open(metadata_errors=...), which faster-whisper 1.2.1 calls.
+av==18.1.0
