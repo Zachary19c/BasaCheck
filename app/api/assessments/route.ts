@@ -1,6 +1,5 @@
 import { apiError, isUuid, readJsonObject } from "@/lib/assessment/api";
 import type { CreateAssessmentResponse } from "@/lib/assessment/contract";
-import { isDemoMode } from "@/lib/demo-mode";
 import { findReadingFixture } from "@/lib/reading";
 import { createClient } from "@/lib/supabase/server";
 import type { SupportedLanguage } from "@/lib/types";
@@ -61,8 +60,8 @@ export async function POST(request: Request) {
   }
 
   const offlineTap = inputMode === "tap";
-  // Demo Mode labels speech checks. An offline tap stays a teacher-marked check.
-  const demoTranscript = !offlineTap && (isDemoMode() || useFixture === true);
+  // The teacher explicitly chooses a prepared transcript for this check.
+  const demoTranscript = !offlineTap && useFixture === true;
   if (demoTranscript && !findReadingFixture(passageId, passageLanguage)) {
     return apiError(
       409,

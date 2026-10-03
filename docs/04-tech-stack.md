@@ -84,9 +84,9 @@ No login. RLS is enabled on every table with no policies and no grants to `anon`
 
 `lib/reading/fixture-fil.ts` and `fixture-en.ts` export fixtures keyed by passage ID with transcript, language, and duration. Every seeded passage needs a fixture; check passage identity before scoring. A check may use only a passage whose grade matches the learner. Fixture mode still requires teacher confirmation.
 
-Seed Ana, four original passages (two per language), twelve reviewed questions, and one completed illustrative follow-up for the primary Filipino passage. Follow-up has a confirmed transcript and metrics derived by the same engine, `seeded_demo=true`, and comprehension 3/3. Link it explicitly to the demo baseline for progress; never infer a pair merely from creation times. Preserve it when adding live runs. The primary passage has 60 normalized tokens; one substitution gives 59/60 accuracy, and 60 seconds gives 60 WPM.
+Seed Ana, four original passages (two per language), twelve reviewed questions, and one completed illustrative follow-up for the primary Filipino passage. Follow-up has a confirmed transcript and metrics derived by the same engine, `seeded_demo=true`, and comprehension 3/3. Link it explicitly to the demo baseline for progress; never infer a pair merely from creation times. Preserve it when adding live runs. The primary passage has 33 normalized tokens; one substitution gives 32/33 accuracy, and 33 seconds gives 60 WPM.
 
-`DEMO_MODE=true`: use matching fixture and label a speech assessment immediately. An offline tap stays `input_mode = tap` and `demo_transcript = false`. In live mode, speech failure returns an error; only explicit teacher selection starts a disclosed fixture assessment. No silent fallback.
+`DEMO_MODE=true`: offer a matching prepared transcript alongside live recording. Label a speech assessment as Demo Mode only when the teacher selects the prepared transcript. An offline tap stays `input_mode = tap` and `demo_transcript = false`. Speech failure returns an error; only explicit teacher selection starts a disclosed fixture assessment. No silent fallback.
 
 ## Environment and layout
 

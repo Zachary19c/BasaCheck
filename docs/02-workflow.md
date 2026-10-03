@@ -50,6 +50,6 @@ Keep every new run as a new row. Never overwrite the seeded follow-up. Transcrip
 | Answers/save fails | Keep existing data; offer retry |
 | Incomparable follow-up | Explain language/passage mismatch; no direct delta |
 
-`DEMO_MODE=true` selects fixture processing for a speech check and visibly announces it. It does not relabel an offline tap. With live mode, failure never silently switches: the teacher must choose Demo Mode. Carry `demo_transcript`, `seeded_demo`, and `input_mode = tap` labels onto results and progress. Fixture duration belongs to the fixture; do not combine fixture words with an unrelated live recording duration. Tap duration is the on-screen timer.
+`DEMO_MODE=true` shows the prepared-transcript choice alongside live recording. Only the teacher's explicit prepared-transcript choice uses a fixture and sets `demo_transcript`. It does not relabel an offline tap. If live transcription fails, the teacher may explicitly choose Demo Mode; the app never switches automatically. Carry `demo_transcript`, `seeded_demo`, and `input_mode = tap` labels onto results and progress. Fixture duration belongs to the fixture; do not combine fixture words with an unrelated live recording duration. Tap duration is the on-screen timer.
 
 Audio may exist in browser memory, HTTP processing, and temporary decoder files. Release it after transcription and clean temporary files even on failure. An offline tap never creates those files. MVP transcript review has no audio replay; uncertain recordings must be repeated.

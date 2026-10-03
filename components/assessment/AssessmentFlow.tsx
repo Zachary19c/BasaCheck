@@ -73,6 +73,7 @@ export function AssessmentFlow({
   const [startingDemo, setStartingDemo] = useState(false);
   const [savingTap, setSavingTap] = useState(false);
   const [active, setActive] = useState<ActiveAssessment | null>(null);
+  const creatingRef = useRef(false);
   // Recorder callbacks finish after later renders, so they read the current assessment here.
   const activeRef = useRef<ActiveAssessment | null>(null);
 
@@ -102,7 +103,8 @@ export function AssessmentFlow({
     useFixture: boolean,
     inputMode?: "tap",
   ): Promise<ActiveAssessment | null> {
-    if (!selected) return null;
+    if (!selected || creatingRef.current) return null;
+    creatingRef.current = true;
     const payload: CreateAssessmentRequest = {
       learnerId,
       passageId: selected.id,
@@ -111,6 +113,7 @@ export function AssessmentFlow({
       inputMode,
     };
     const result = await postJson<CreateAssessmentResponse>("/api/assessments", payload);
+    creatingRef.current = false;
     if (!result.ok) {
       fail(result.message);
       return null;
@@ -214,7 +217,7 @@ export function AssessmentFlow({
   const steps = (
     phase.name === "tapping"
       ? ["Choose", "Mark words", "Check words", "Questions"]
-      : demoMode
+      : active?.demoTranscript
         ? ["Choose", "Prepared reading", "Check words", "Questions"]
         : [...STEPS]
   ) as [string, string, string, string];
@@ -239,8 +242,8 @@ export function AssessmentFlow({
 
       {demoMode && (
         <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
-          <strong>Demo Mode is on.</strong> Each assessment uses a prepared transcript matched to
-          its passage. Recordings are not sent for transcription.
+          <strong>Prepared transcript available.</strong> Choose live recording or the passage’s
+          prepared transcript. Demo Mode is used only when you select it.
         </p>
       )}
 
@@ -273,13 +276,20 @@ export function AssessmentFlow({
             aria-labelledby="read-heading"
             className="space-y-4 rounded-xl border border-neutral-300 p-4"
           >
-            <div>
-              <h2 id="read-heading" className="text-lg font-bold">
-                {selected.title}
-              </h2>
-              <p lang={selected.language} className="mt-1 text-sm font-semibold text-neutral-700">
-                {INSTRUCTIONS[selected.language]}
-              </p>
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+              <div>
+                <h2 id="read-heading" className="text-lg font-bold">
+                  {selected.title}
+                </h2>
+                <p lang={selected.language} className="mt-1 text-sm font-semibold text-neutral-700">
+                  {INSTRUCTIONS[selected.language]}
+                </p>
+              </div>
+              {!startingDemo && (
+                <div className="sm:w-44">
+                  <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
+                </div>
+              )}
             </div>
             <p lang={selected.language} className="text-xl leading-relaxed">
               {selected.content}
@@ -293,17 +303,15 @@ export function AssessmentFlow({
                 Mark words offline
               </button>
             )}
-            {demoMode ? (
+            {demoMode && canUseFixture && phase.name === "setup" && (
               <button
                 type="button"
                 onClick={startDemoAssessment}
-                disabled={startingDemo || phase.name === "recording"}
+                disabled={startingDemo}
                 className="min-h-12 w-full rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
               >
                 {startingDemo ? "Loading the prepared transcript…" : "Continue with prepared transcript"}
               </button>
-            ) : (
-              <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
             )}
           </section>
         ) : (
@@ -393,7 +401,7 @@ export function AssessmentFlow({
           className="space-y-3 rounded-xl border border-red-300 bg-red-50 p-4"
         >
           <h2 id="error-heading" className="font-bold text-red-950">
-            {demoMode ? "This check could not continue" : "This recording could not be used"}
+            {active?.demoTranscript ? "This check could not continue" : "This recording could not be used"}
           </h2>
           <p className="text-red-950">{phase.message}</p>
           <p className="text-sm text-red-950">No reading score was saved.</p>
@@ -405,7 +413,7 @@ export function AssessmentFlow({
             >
               Try again
             </button>
-            {canUseFixture && !demoMode && (
+            {canUseFixture && (
               <button
                 type="button"
                 onClick={startDemoAssessment}
@@ -416,7 +424,7 @@ export function AssessmentFlow({
               </button>
             )}
           </div>
-          {canUseFixture && !demoMode && (
+          {canUseFixture && (
             <p className="text-sm text-red-950">
               Demo Mode uses a prepared transcript matched to this passage and is labeled on the
               results. You still check and confirm it before scoring.
