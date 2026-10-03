@@ -257,83 +257,92 @@ export function AssessmentFlow({
         ))}
       </ol>
 
-      <section aria-labelledby="setup-heading" className="space-y-3">
-        <h2 id="setup-heading" className="text-lg font-semibold">
-          Choose the reading
-        </h2>
-        {showPicker ? (
-          <PassagePicker
-            language={language}
-            passageId={passageId}
-            passages={passages}
-            locked={locked}
-            onLanguageChange={changeLanguage}
-            onPassageChange={setPassageId}
-          />
-        ) : (
-          selected && (
-            <p className="rounded-xl border border-line bg-sheet p-3 text-sm">
-              {selected.language === "fil" ? "Filipino" : "English"} · {selected.title} ·{" "}
-              {selected.wordCount} words. Language and passage stay locked for this check.
-            </p>
-          )
-        )}
-      </section>
+      {/* Choosing and reading sit side by side on wide screens. */}
+      <div
+        className={`grid gap-6 ${
+          phase.name === "setup" || phase.name === "recording"
+            ? "md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start lg:gap-8"
+            : ""
+        }`}
+      >
+        <section aria-labelledby="setup-heading" className="space-y-3">
+          <h2 id="setup-heading" className="text-lg font-semibold">
+            Choose the reading
+          </h2>
+          {showPicker ? (
+            <PassagePicker
+              language={language}
+              passageId={passageId}
+              passages={passages}
+              locked={locked}
+              onLanguageChange={changeLanguage}
+              onPassageChange={setPassageId}
+            />
+          ) : (
+            selected && (
+              <p className="rounded-xl border border-line bg-sheet p-3 text-sm">
+                {selected.language === "fil" ? "Filipino" : "English"} · {selected.title} ·{" "}
+                {selected.wordCount} words. Language and passage stay locked for this check.
+              </p>
+            )
+          )}
+        </section>
 
-      {(phase.name === "setup" || phase.name === "recording") &&
-        (selected ? (
-          <section
-            aria-labelledby="read-heading"
-            className="panel space-y-5 p-5"
-          >
-            {/* Title full width, then the recorder above the passage so it never needs a scroll. */}
-            <div className="space-y-4">
-              <div>
-                <h2 id="read-heading" className="text-xl font-semibold">
-                  {selected.title}
-                </h2>
-                <p lang={selected.language} className="mt-1 text-sm font-medium text-teal-deep">
-                  {INSTRUCTIONS[selected.language]}
-                </p>
+        {(phase.name === "setup" || phase.name === "recording") &&
+          (selected ? (
+            <section
+              aria-labelledby="read-heading"
+              className="panel space-y-5 p-5 md:sticky md:top-6"
+            >
+              {/* Title full width, then the recorder above the passage so it never needs a scroll. */}
+              <div className="space-y-4">
+                <div>
+                  <h2 id="read-heading" className="text-xl font-semibold">
+                    {selected.title}
+                  </h2>
+                  <p lang={selected.language} className="mt-1 text-sm font-medium text-teal-deep">
+                    {INSTRUCTIONS[selected.language]}
+                  </p>
+                </div>
+                {!startingDemo && (
+                  <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
+                )}
               </div>
-              {!startingDemo && (
-                <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
-              )}
-            </div>
-            <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
-              {selected.content}
-            </p>
-            {phase.name === "setup" && (
-              <button
-                type="button"
-                onClick={startTapMode}
-                className="btn btn-secondary w-full"
-              >
-                <HandIcon size={18} />
-                Mark words offline
-              </button>
-            )}
-            {demoMode && canUseFixture && phase.name === "setup" && (
-              <details className="note-dashed">
-                <summary className="cursor-pointer font-semibold text-ink">Demo Mode: use a sample transcript</summary>
-                <p className="mt-2 text-sm">
-                  This is a sample, not a transcript of the learner’s recording. Use it only to
-                  demonstrate the assessment workflow.
-                </p>
+              <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
+                {selected.content}
+              </p>
+              {phase.name === "setup" && (
                 <button
                   type="button"
-                  onClick={startDemoAssessment}
-                  disabled={startingDemo}
-                  className="btn btn-secondary mt-3 w-full"
+                  onClick={startTapMode}
+                  className="btn btn-secondary w-full"
                 >
-                  {startingDemo ? "Loading the sample transcript…" : "Use sample transcript"}
+                  <HandIcon size={18} />
+                  Mark words offline
                 </button>
-              </details>
-            )}
-          </section>
-        ) : (
-          <p className="text-sm text-ink-2">Choose a passage to start recording.</p>
-        ))}
+              )}
+              {demoMode && canUseFixture && phase.name === "setup" && (
+                <details className="note-dashed">
+                  <summary className="cursor-pointer font-semibold text-ink">Demo Mode: use a sample transcript</summary>
+                  <p className="mt-2 text-sm">
+                    This is a sample, not a transcript of the learner’s recording. Use it only to
+                    demonstrate the assessment workflow.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={startDemoAssessment}
+                    disabled={startingDemo}
+                    className="btn btn-secondary mt-3 w-full"
+                  >
+                    {startingDemo ? "Loading the sample transcript…" : "Use sample transcript"}
+                  </button>
+                </details>
+              )}
+            </section>
+          ) : (
+            <p className="note-dashed text-ink-2">Choose a passage to start recording.</p>
+          ))}
+      </div>
 
       {phase.name === "processing" && (
         <p role="status" aria-live="polite" className="panel flex items-center gap-4 p-4 font-medium">
@@ -394,7 +403,7 @@ export function AssessmentFlow({
                   draft: phase.verifiedTranscript,
                 })
               }
-              className="btn btn-secondary w-full"
+              className="btn btn-secondary w-full sm:w-auto"
             >
               Edit transcript
             </button>
@@ -424,7 +433,7 @@ export function AssessmentFlow({
           </h2>
           <p className="text-red-950">{phase.message}</p>
           <p className="text-sm text-red-950">No reading score was saved.</p>
-          <div className="grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <button
               type="button"
               onClick={startOver}

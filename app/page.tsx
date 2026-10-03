@@ -97,7 +97,7 @@ export default function Home() {
             ))}
           </ol>
 
-          <div className="mt-14 grid items-start gap-8 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] sm:gap-8 lg:gap-12">
+          <div className="mt-14 grid items-start gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-12">
             <figure className="panel p-6 md:p-8">
               <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="text-lg font-semibold">A finished check</span>
@@ -107,13 +107,13 @@ export default function Home() {
                 <div className="flex flex-col-reverse items-center gap-2">
                   <dt className="text-sm font-medium text-ink-2">Passage Reading Accuracy</dt>
                   <dd>
-                    <TickGauge value={94} caption="accuracy" />
+                    <TickGauge value={94} size={116} caption="accuracy" />
                   </dd>
                 </div>
                 <div className="flex flex-col-reverse items-center gap-2">
                   <dt className="text-sm font-medium text-ink-2">Comprehension</dt>
                   <dd>
-                    <TickGauge value={67} caption="2 of 3 correct" />
+                    <TickGauge value={67} size={116} caption="2 of 3 correct" />
                   </dd>
                 </div>
               </dl>
@@ -136,7 +136,7 @@ export default function Home() {
               </div>
             </figure>
 
-            <div className="flex items-start gap-4 sm:pt-10">
+            <div className="flex items-start gap-4 md:pt-10">
               <Image src="/bai.jpg" alt="" width={128} height={128} className="mascot size-14 shrink-0" />
               <div className="bubble bubble-tail-left p-5">
                 <p className="text-ink">

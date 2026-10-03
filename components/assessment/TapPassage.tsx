@@ -161,7 +161,7 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
         </p>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {!running && elapsed === 0 ? (
           <button
             type="button"

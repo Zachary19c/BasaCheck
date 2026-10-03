@@ -80,11 +80,6 @@ export function TranscriptReview({
         </p>
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold">Expected passage</h3>
-        <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{expectedText}</p>
-      </div>
-
       {recordedAudio && !demoTranscript && !offlineTap && (
         <div>
           <h3 id="recording-replay-heading" className="text-sm font-semibold">
@@ -102,15 +97,21 @@ export function TranscriptReview({
         </div>
       )}
 
-      <div>
-        <h3 className="text-sm font-semibold">
-          {offlineTap
-            ? "Marked transcript"
-            : demoTranscript
-              ? "Sample transcript"
-              : "Recognized transcript"}
-        </h3>
-        <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{originalTranscript}</p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 className="text-sm font-semibold">Expected passage</h3>
+          <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{expectedText}</p>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold">
+            {offlineTap
+              ? "Marked transcript"
+              : demoTranscript
+                ? "Sample transcript"
+                : "Recognized transcript"}
+          </h3>
+          <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{originalTranscript}</p>
+        </div>
       </div>
 
       <div>
@@ -134,7 +135,7 @@ export function TranscriptReview({
         </p>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <button
           type="button"
           onClick={confirm}

@@ -77,7 +77,7 @@ function CheckSummary({ title, assessment }: { title: string; assessment: Assess
 
 function ComparisonCard({ result, title }: { result: ComparisonResult; title: string }) {
   return (
-    <article className="panel space-y-4 p-5">
+    <article className="panel h-full space-y-4 p-5">
       <p className="meta text-sm">
         {title} · {result.baseline.language === "fil" ? "Filipino" : "English"}
       </p>
@@ -91,8 +91,10 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
-          <CheckSummary title="Follow-up" assessment={result.followUp} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <CheckSummary title="Baseline" assessment={result.baseline} />
+            <CheckSummary title="Follow-up" assessment={result.followUp} />
+          </div>
         </>
       )}
 
@@ -101,8 +103,10 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
           <p role="note" className="note-dashed">
             {MISMATCH_MESSAGE}
           </p>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
-          <CheckSummary title="Unlinked follow-up" assessment={result.followUp} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <CheckSummary title="Baseline" assessment={result.baseline} />
+            <CheckSummary title="Unlinked follow-up" assessment={result.followUp} />
+          </div>
         </>
       )}
 
@@ -118,6 +122,16 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
 export function ProgressView({ assessments, passageTitles }: ProgressViewProps) {
   const comparisons = buildComparisons(assessments);
+  // Linked pairs read across the page; single checks sit in a grid on wide screens.
+  const linked = comparisons.filter((result) => result.kind !== "none");
+  const single = comparisons.filter((result) => result.kind === "none");
+  const card = (result: ComparisonResult) => (
+    <ComparisonCard
+      key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
+      result={result}
+      title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
+    />
+  );
 
   return (
     <section aria-labelledby="progress-comparison-heading" className="space-y-4">
@@ -127,13 +141,12 @@ export function ProgressView({ assessments, passageTitles }: ProgressViewProps) 
       {comparisons.length === 0 ? (
         <p className="text-sm text-ink-2">No completed checks yet.</p>
       ) : (
-        comparisons.map((result) => (
-          <ComparisonCard
-            key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
-            result={result}
-            title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
-          />
-        ))
+        <>
+          {linked.map(card)}
+          {single.length > 0 && (
+            <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">{single.map(card)}</div>
+          )}
+        </>
       )}
     </section>
   );

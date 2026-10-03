@@ -94,37 +94,41 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
   return (
     <form onSubmit={submit} lang={language} className="space-y-4">
       <p className="text-sm text-ink-2">{copy.intro}</p>
-      {questions.map((question, questionIndex) => (
-        <fieldset
-          key={question.id}
-          disabled={submitting}
-          className="panel space-y-2 p-4"
-        >
-          <legend className="px-1 font-semibold">
-            <span className="meta mb-1 block text-xs">
-              {copy.question} {questionIndex + 1}
-              {copy.levels[questionIndex] ? ` · ${copy.levels[questionIndex]}` : ""}
-            </span>
-            {question.prompt}
-          </legend>
-          {question.choices.map((choice, choiceIndex) => (
-            <label
-              key={choiceIndex}
-              className="choice flex min-h-12 items-center gap-3 px-3"
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value={choiceIndex}
-                checked={answers[questionIndex] === choiceIndex}
-                onChange={() => choose(questionIndex, choiceIndex)}
-                className="radio-mark"
-              />
-              <span>{choice}</span>
-            </label>
-          ))}
-        </fieldset>
-      ))}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {questions.map((question, questionIndex) => (
+          <fieldset
+            key={question.id}
+            disabled={submitting}
+            className="panel min-w-0 p-4"
+          >
+            <legend className="float-left mb-3 w-full font-semibold">
+              <span className="meta mb-1 block text-xs">
+                {copy.question} {questionIndex + 1}
+                {copy.levels[questionIndex] ? ` · ${copy.levels[questionIndex]}` : ""}
+              </span>
+              {question.prompt}
+            </legend>
+            <div className="clear-both grid gap-2 md:grid-cols-3 lg:grid-cols-1">
+              {question.choices.map((choice, choiceIndex) => (
+                <label
+                  key={choiceIndex}
+                  className="choice flex min-h-12 items-center gap-3 px-3"
+                >
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    value={choiceIndex}
+                    checked={answers[questionIndex] === choiceIndex}
+                    onChange={() => choose(questionIndex, choiceIndex)}
+                    className="radio-mark"
+                  />
+                  <span>{choice}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+      </div>
 
       {error && (
         <p role="alert" className="alert">
@@ -135,7 +139,7 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
       <button
         type="submit"
         disabled={!complete || submitting}
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full sm:w-auto sm:min-w-64"
       >
         {submitting ? copy.submitting : copy.submit}
       </button>

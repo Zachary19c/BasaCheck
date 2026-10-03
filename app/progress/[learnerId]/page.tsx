@@ -45,7 +45,7 @@ export default async function ProgressPage({
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 pt-6 pb-16">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 pt-6 pb-16 sm:max-w-6xl sm:px-10">
       <Link className="link-quiet self-start" href="/dashboard">
         <ArrowLeftIcon size={16} />
         Back to dashboard

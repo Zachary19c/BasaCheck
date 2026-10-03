@@ -44,7 +44,7 @@ export function AiRecommendation({ assessmentId }: { assessmentId: string }) {
   }
 
   return (
-    <section aria-labelledby="ai-heading" className="space-y-3">
+    <section aria-labelledby="ai-heading" className="max-w-3xl space-y-3">
       <div className="flex items-center justify-between gap-2">
         <h2 id="ai-heading" className="text-lg font-semibold">
           Ask bAI
@@ -112,10 +112,7 @@ export function AiRecommendation({ assessmentId }: { assessmentId: string }) {
               </span>
             </p>
           ) : (
-            <p className="text-sm text-ink">
-              I can explain these results in plain English and say which activity card fits. I only
-              use BasaCheck&apos;s numbers, never the learner&apos;s name.
-            </p>
+            <p className="text-sm text-ink">Need help reading these results? Ask me.</p>
           )}
 
           {state.name === "error" && (
@@ -130,7 +127,7 @@ export function AiRecommendation({ assessmentId }: { assessmentId: string }) {
         type="button"
         onClick={generate}
         disabled={state.name === "loading"}
-        className="btn btn-secondary w-full"
+        className="btn btn-secondary w-full sm:w-auto sm:min-w-56"
       >
         <SparkIcon size={16} className="text-teal" />
         {state.name === "loading" ? "bAI is thinking…" : state.name === "done" ? "Ask again" : "Ask bAI"}

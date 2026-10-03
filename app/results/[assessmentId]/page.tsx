@@ -84,7 +84,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
   }));
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-7 px-6 pt-6 pb-16">
+    <main className="mx-auto w-full max-w-md space-y-8 px-6 pt-6 pb-16 sm:max-w-6xl sm:px-10">
       <header className="space-y-3">
         <Link href="/dashboard" className="link-quiet">
           <ArrowLeftIcon size={16} />
@@ -105,92 +105,96 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
         </p>
       )}
 
-      <section aria-labelledby="measurements-heading" className="panel space-y-5 p-5">
-        <h2 id="measurements-heading" className="text-lg font-semibold">
-          Measurements
-        </h2>
-        <dl className="space-y-5">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col-reverse items-center gap-2 text-center">
-              <dt className="text-sm font-medium text-ink-2">Passage Reading Accuracy</dt>
-              <dd>
-                <TickGauge
-                  value={assessment.accuracyPercent}
-                  display={percent(assessment.accuracyPercent)}
-                />
-                {assessment.accuracyPercent === null && <span className="sr-only">Not recorded</span>}
-              </dd>
-            </div>
-            <div className="flex flex-col-reverse items-center gap-2 text-center">
-              <dt className="text-sm font-medium text-ink-2">Comprehension</dt>
-              <dd>
-                <TickGauge
-                  value={assessment.comprehensionPercent}
-                  display={percent(assessment.comprehensionPercent)}
-                  caption={questionsCorrect(assessment.comprehensionPercent)}
-                />
-                {assessment.comprehensionPercent === null && (
-                  <span className="sr-only">Not recorded</span>
-                )}
-              </dd>
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4">
-            <dt className="text-sm font-medium text-ink-2">Reading Rate</dt>
-            <dd className="text-sm font-semibold tabular-nums">
-              {assessment.wpm === null ? "Not recorded" : `${formatNumber(assessment.wpm)} words per minute`}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <section aria-labelledby="differences-heading" className="space-y-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 id="differences-heading" className="text-lg font-semibold">
-            Word differences
+      <div className="grid items-start gap-8 md:grid-cols-2">
+        <section aria-labelledby="measurements-heading" className="panel space-y-5 p-5">
+          <h2 id="measurements-heading" className="text-lg font-semibold">
+            Measurements
           </h2>
-          {differences.length > 0 && <span className="meta">{differences.length} total</span>}
-        </div>
-        {differences.length === 0 ? (
-          <p className="text-sm text-ink-2">No word differences recorded.</p>
-        ) : (
-          <>
-            <div className="flex h-2.5 gap-1" aria-hidden="true">
-              {counts
-                .filter((item) => item.count > 0)
-                .map((item) => (
-                  <span
-                    key={item.type}
-                    className={`rounded-full ${EVENT_SWATCH[item.type]}`}
-                    style={{ flexGrow: item.count }}
+          <dl className="space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col-reverse items-center gap-2 text-center">
+                <dt className="text-sm font-medium text-ink-2">Passage Reading Accuracy</dt>
+                <dd>
+                  <TickGauge
+                    size={120}
+                    value={assessment.accuracyPercent}
+                    display={percent(assessment.accuracyPercent)}
                   />
-                ))}
+                  {assessment.accuracyPercent === null && <span className="sr-only">Not recorded</span>}
+                </dd>
+              </div>
+              <div className="flex flex-col-reverse items-center gap-2 text-center">
+                <dt className="text-sm font-medium text-ink-2">Comprehension</dt>
+                <dd>
+                  <TickGauge
+                    size={120}
+                    value={assessment.comprehensionPercent}
+                    display={percent(assessment.comprehensionPercent)}
+                    caption={questionsCorrect(assessment.comprehensionPercent)}
+                  />
+                  {assessment.comprehensionPercent === null && (
+                    <span className="sr-only">Not recorded</span>
+                  )}
+                </dd>
+              </div>
             </div>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-2">
-              {counts.map((item) => (
-                <li key={item.type} className="flex items-center gap-1.5">
-                  <span className={`size-2.5 rounded-[3px] ${EVENT_SWATCH[item.type]}`} aria-hidden="true" />
-                  {EVENT_LABELS[item.type]} <span className="font-mono tabular-nums">{item.count}</span>
-                </li>
-              ))}
-            </ul>
-            <ul lang={assessment.language} className="flex flex-wrap gap-2 pt-1">
-              {differences.map((event, index) => (
-                <li key={index} className="panel px-3 py-2 text-sm shadow-none">
-                  <span className="meta flex items-center gap-1.5 text-xs">
+            <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4">
+              <dt className="text-sm font-medium text-ink-2">Reading Rate</dt>
+              <dd className="text-sm font-semibold tabular-nums">
+                {assessment.wpm === null ? "Not recorded" : `${formatNumber(assessment.wpm)} words per minute`}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="differences-heading" className="space-y-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 id="differences-heading" className="text-lg font-semibold">
+              Word differences
+            </h2>
+            {differences.length > 0 && <span className="meta">{differences.length} total</span>}
+          </div>
+          {differences.length === 0 ? (
+            <p className="text-sm text-ink-2">No word differences recorded.</p>
+          ) : (
+            <>
+              <div className="flex h-2.5 gap-1" aria-hidden="true">
+                {counts
+                  .filter((item) => item.count > 0)
+                  .map((item) => (
                     <span
-                      className={`size-2 rounded-[2px] ${EVENT_SWATCH[event.type as DifferenceType]}`}
-                      aria-hidden="true"
+                      key={item.type}
+                      className={`rounded-full ${EVENT_SWATCH[item.type]}`}
+                      style={{ flexGrow: item.count }}
                     />
-                    {EVENT_LABELS[event.type]}
-                  </span>
-                  {eventText(event)}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
+                  ))}
+              </div>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-2">
+                {counts.map((item) => (
+                  <li key={item.type} className="flex items-center gap-1.5">
+                    <span className={`size-2.5 rounded-[3px] ${EVENT_SWATCH[item.type]}`} aria-hidden="true" />
+                    {EVENT_LABELS[item.type]} <span className="font-mono tabular-nums">{item.count}</span>
+                  </li>
+                ))}
+              </ul>
+              <ul lang={assessment.language} className="flex flex-wrap gap-2 pt-1">
+                {differences.map((event, index) => (
+                  <li key={index} className="panel px-3 py-2 text-sm shadow-none">
+                    <span className="meta flex items-center gap-1.5 text-xs">
+                      <span
+                        className={`size-2 rounded-[2px] ${EVENT_SWATCH[event.type as DifferenceType]}`}
+                        aria-hidden="true"
+                      />
+                      {EVENT_LABELS[event.type]}
+                    </span>
+                    {eventText(event)}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+      </div>
 
       {complete && <AiRecommendation assessmentId={assessment.id} />}
 
@@ -215,12 +219,12 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
         </section>
       )}
 
-      <div className="space-y-3 border-t border-line pt-6">
-        <p className="text-sm text-ink-2">
+      <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-ink-2 sm:max-w-xl">
           Progress compares a check only with the follow-up linked to it. Saving an activity does
           not create that follow-up.
         </p>
-        <Link href={`/progress/${assessment.learnerId}`} className="btn btn-primary w-full">
+        <Link href={`/progress/${assessment.learnerId}`} className="btn btn-primary w-full sm:w-auto sm:shrink-0">
           View observed change
           <ArrowRightIcon size={18} />
         </Link>

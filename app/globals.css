@@ -3,6 +3,8 @@
 /* BasaCheck: plain paper inside a tan frame, ink type, and bAI's teal and
    book-yellow for measured values and highlights. */
 @theme {
+  /* Wide layouts start at 700px, so a half-screen browser window gets them too. */
+  --breakpoint-md: 43.75rem;
   --color-paper: #e8e8e4;
   --color-sheet: #f8f8f5;
   --color-frame: #b9ae9b;

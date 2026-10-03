@@ -4,21 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// One header for the landing page (wide, with the judge-facing links) and the
-// teacher screens (phone-width column).
+// One header for the landing page (with the judge-facing links) and the
+// teacher screens. Phone-width on phones, wide on the web.
 export function AppHeader() {
-  const pathname = usePathname();
-  const landing = pathname === "/";
-  // The dashboard lays learners out side by side on wide screens, so the
-  // header widens with it; the other teacher screens stay phone-width.
-  const wide = landing || pathname === "/dashboard";
+  const landing = usePathname() === "/";
 
   return (
     <header className="relative z-10">
       <div
-        className={`mx-auto flex items-center justify-between gap-4 px-6 pt-6 pb-2 md:pt-8 ${
-          wide ? "max-w-md sm:max-w-6xl sm:px-10" : "max-w-md"
-        }`}
+        className="mx-auto flex max-w-md items-center justify-between gap-4 px-6 pt-6 pb-2 sm:max-w-6xl sm:px-10 md:pt-8"
       >
         <Link href={landing ? "/" : "/dashboard"} className="flex items-center gap-2.5">
           <Image src="/bai.jpg" alt="" width={64} height={64} className="size-8 rounded-[9px]" />

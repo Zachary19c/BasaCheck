@@ -73,7 +73,7 @@ export default async function AssessPage({
   );
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-7 px-6 pt-6 pb-16">
+    <main className="mx-auto w-full max-w-md space-y-7 px-6 pt-6 pb-16 sm:max-w-6xl sm:px-10">
       <header className="space-y-3">
         <Link href="/dashboard" className="link-quiet">
           <ArrowLeftIcon size={16} />
