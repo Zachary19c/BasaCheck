@@ -54,7 +54,7 @@ export function TranscriptReview({
   return (
     <section aria-labelledby="review-heading" className="space-y-4">
       <div className="space-y-1">
-        <h2 id="review-heading" className="text-lg font-bold">
+        <h2 id="review-heading" className="text-lg font-semibold">
           {offlineTap
             ? "Review marked words"
             : demoTranscript
@@ -62,27 +62,22 @@ export function TranscriptReview({
               : "Review recording transcript"}
         </h2>
         {offlineTap && (
-          <p className="inline-block rounded bg-teal-100 px-2 py-0.5 text-sm font-semibold text-teal-900">
+          <p className="tag tag-dashed">
             Offline tap · teacher-marked words
           </p>
         )}
         {demoTranscript && (
-          <p className="inline-block rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900">
+          <p className="tag tag-dashed">
             Demo Mode · prepared transcript
           </p>
         )}
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-ink-2">
           {offlineTap
             ? "This text comes from the words you marked. Change it if a tap does not match what the learner said."
             : demoTranscript
               ? "This is a prepared sample, not the learner’s recording. Results from this path are labeled Demo Mode."
               : "Replay the recording and compare it with the recognized text. Fix speech-recognition mistakes, but keep the learner’s real differences from the passage. If you cannot tell what was said, record again."}
         </p>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-semibold">Expected passage</h3>
-        <p className="mt-1 rounded-lg bg-neutral-100 p-3">{expectedText}</p>
       </div>
 
       {recordedAudio && !demoTranscript && !offlineTap && (
@@ -95,22 +90,28 @@ export function TranscriptReview({
             controls
             preload="metadata"
             aria-labelledby="recording-replay-heading"
-            className="mt-1 w-full"
+            className="mt-2 w-full rounded-full"
           >
             Your browser cannot play this recording.
           </audio>
         </div>
       )}
 
-      <div>
-        <h3 className="text-sm font-semibold">
-          {offlineTap
-            ? "Marked transcript"
-            : demoTranscript
-              ? "Sample transcript"
-              : "Recognized transcript"}
-        </h3>
-        <p className="mt-1 rounded-lg bg-neutral-100 p-3">{originalTranscript}</p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 className="text-sm font-semibold">Expected passage</h3>
+          <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{expectedText}</p>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold">
+            {offlineTap
+              ? "Marked transcript"
+              : demoTranscript
+                ? "Sample transcript"
+                : "Recognized transcript"}
+          </h3>
+          <p className="mt-1 rounded-xl border border-line bg-sheet p-3">{originalTranscript}</p>
+        </div>
       </div>
 
       <div>
@@ -124,22 +125,22 @@ export function TranscriptReview({
           maxLength={MAX_TRANSCRIPT_CHARS}
           rows={5}
           disabled={busy}
-          className="mt-1 block w-full rounded-lg border border-neutral-400 p-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:bg-neutral-100"
+          className="field mt-1"
         />
       </div>
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+        <p role="alert" className="alert">
           {error}
         </p>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <button
           type="button"
           onClick={confirm}
           disabled={busy || !draft.trim()}
-          className="min-h-12 rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary"
         >
           {busy ? "Confirming…" : "Confirm transcript"}
         </button>
@@ -147,7 +148,7 @@ export function TranscriptReview({
           type="button"
           onClick={onRecordAgain}
           disabled={busy}
-          className="min-h-12 rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn btn-secondary"
         >
           {offlineTap ? "Mark words again" : demoTranscript ? "Start a live recording" : "Record again"}
         </button>

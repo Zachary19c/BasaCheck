@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MicIcon, StopIcon } from "@/components/ui/icons";
 import { MAX_RECORDING_SECONDS } from "@/lib/assessment/contract";
 
 const PREFERRED_TYPES = [
@@ -129,18 +130,19 @@ export function Recorder({ onStart, onRecorded, onError }: RecorderProps) {
   if (state === "recording") {
     return (
       <div className="space-y-3">
-        <p className="flex items-center gap-2 font-semibold" role="status" aria-live="polite">
-          <span className="size-3 rounded-full bg-red-600" aria-hidden="true" />
+        <p className="flex items-center gap-2.5 font-mono text-lg font-semibold tabular-nums" role="status" aria-live="polite">
+          <span className="rec-dot size-3 rounded-full bg-danger" aria-hidden="true" />
           Recording {formatTime(elapsed)}
         </p>
         <button
           type="button"
           onClick={stop}
-          className="min-h-12 w-full rounded-lg bg-red-700 px-4 font-semibold text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+          className="btn btn-danger w-full"
         >
+          <StopIcon size={18} />
           Stop recording
         </button>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted">
           Recording stops automatically at {formatTime(MAX_RECORDING_SECONDS)}.
         </p>
       </div>
@@ -152,8 +154,9 @@ export function Recorder({ onStart, onRecorded, onError }: RecorderProps) {
       type="button"
       onClick={start}
       disabled={state === "starting"}
-      className="min-h-12 w-full rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+      className="btn btn-primary w-full"
     >
+      <MicIcon size={18} />
       {state === "starting" ? "Starting microphone…" : "Start recording"}
     </button>
   );

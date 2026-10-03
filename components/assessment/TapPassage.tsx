@@ -104,18 +104,18 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
   return (
     <section aria-labelledby="tap-heading" className="space-y-4">
       <div className="space-y-1">
-        <h2 id="tap-heading" className="text-lg font-bold">
+        <h2 id="tap-heading" className="text-lg font-semibold">
           Offline tap
         </h2>
-        <p className="inline-block rounded bg-teal-100 px-2 py-0.5 text-sm font-semibold text-teal-900">
+        <p className="tag tag-dashed">
           No microphone. The teacher marks the words.
         </p>
-        <p lang={language} className="text-sm text-neutral-700">
+        <p lang={language} className="text-sm text-ink-2">
           {copy.help}
         </p>
       </div>
 
-      <p className="font-semibold" role="status" aria-live="polite">
+      <p className="font-mono font-semibold tabular-nums" role="status" aria-live="polite">
         {running ? "Reading" : elapsed > 0 ? "Reading stopped" : "Not started"}{" "}
         {formatTime(Math.floor(elapsed))} · {missedCount} {copy.missed}
       </p>
@@ -130,10 +130,10 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
                 aria-pressed={missed}
                 disabled={saving}
                 onClick={() => toggle(index)}
-                className={`min-h-12 w-full rounded-lg border px-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:opacity-60 ${
+                className={`min-h-12 w-full rounded-[10px] border px-3 text-lg font-medium transition-colors disabled:opacity-60 ${
                   missed
-                    ? "border-amber-400 bg-amber-100 text-amber-950"
-                    : "border-neutral-300 bg-white"
+                    ? "border-sun-deep bg-sun text-ink"
+                    : "border-ink/15 bg-sheet hover:border-ink/40"
                 }`}
               >
                 {token}
@@ -147,7 +147,7 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
                   onChange={(event) =>
                     setMarks((previous) => ({ ...previous, [index]: event.target.value }))
                   }
-                  className="mt-1 w-full rounded-lg border border-amber-400 px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                  className="field mt-1 px-2 py-2 text-sm"
                 />
               )}
             </div>
@@ -156,18 +156,18 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
       </div>
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-950">
+        <p role="alert" className="alert">
           {error}
         </p>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {!running && elapsed === 0 ? (
           <button
             type="button"
             onClick={start}
             disabled={saving}
-            className="min-h-12 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+            className="btn btn-primary"
           >
             {copy.start}
           </button>
@@ -176,7 +176,7 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
             type="button"
             onClick={finish}
             disabled={saving}
-            className="min-h-12 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+            className="btn btn-primary"
           >
             {saving ? "Saving…" : copy.done}
           </button>
@@ -185,7 +185,7 @@ export function TapPassage({ content, language, saving, onDone, onCancel }: TapP
           type="button"
           onClick={onCancel}
           disabled={saving}
-          className="min-h-12 rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:opacity-60"
+          className="btn btn-secondary"
         >
           {copy.cancel}
         </button>

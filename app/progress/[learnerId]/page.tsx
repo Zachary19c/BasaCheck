@@ -6,6 +6,7 @@ import {
 } from "@/lib/supabase/mappers";
 import { createClient } from "@/lib/supabase/server";
 import { ProgressView } from "../ProgressView";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -44,17 +45,23 @@ export default async function ProgressPage({
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6">
-      <Link className="text-sm font-semibold text-teal-700" href="/dashboard">
-        ← Back to dashboard
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 pt-6 pb-16 sm:max-w-6xl sm:px-10">
+      <Link className="link-quiet self-start" href="/dashboard">
+        <ArrowLeftIcon size={16} />
+        Back to dashboard
       </Link>
       <section>
-        <p className="text-sm font-medium text-teal-700">Learner progress</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">{learner.display_name}</h1>
-        <p className="mt-1 text-neutral-600">Grade {learner.grade_level}</p>
+        <h1 className="text-[2.125rem] font-bold leading-tight">{learner.display_name}</h1>
+        <p className="meta mt-2 text-sm">Learner progress · Grade {learner.grade_level}</p>
       </section>
       <div data-progress-slot>
         <ProgressView assessments={assessments} passageTitles={passageTitles} />
+      </div>
+      <div className="border-t border-line pt-6">
+        <Link href="/dashboard" className="btn btn-primary w-full sm:w-auto sm:min-w-64">
+          <ArrowLeftIcon size={18} />
+          Choose another learner
+        </Link>
       </div>
     </main>
   );

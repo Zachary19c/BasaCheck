@@ -92,77 +92,99 @@ export function InterventionPicker({
   if (chosen && !showChooser) {
     const card = INTERVENTIONS[chosen];
     const goal = PRACTICE_GOALS[chosen];
+    const total = card.steps.en.length;
     return (
-      <section aria-labelledby="saved-activity-heading" className="space-y-3 rounded-xl border border-teal-300 bg-teal-50 p-4">
-        <p role="status" className="text-sm font-semibold text-teal-900">Activity saved</p>
-        <h3 id="saved-activity-heading" className="text-lg font-bold text-teal-950">
-          {card.title.en}
-        </h3>
-        <p className="text-sm font-semibold text-teal-950">Focus: {goal.focus}</p>
-        {guideFinished ? (
-          <div className="space-y-3" aria-live="polite">
-            <p className="font-semibold text-teal-950">You reached the end of the practice guide.</p>
-            <p className="text-sm text-teal-950">Look for: {goal.lookFor}</p>
-            <p className="text-sm text-teal-950">
-              The practice guide does not change reading scores. Another reading check gives new
-              scores; progress compares checks only when they are linked.
-            </p>
-            <Link
-              href={`/assess/${learnerId}`}
-              className="block min-h-12 rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            >
-              Start another reading check
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setStepIndex(0);
-                setGuideFinished(false);
-              }}
-              className="min-h-12 w-full rounded-lg border border-teal-700 px-4 font-semibold text-teal-900 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            >
-              Review practice steps
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3 rounded-lg border border-teal-200 bg-white p-3" aria-live="polite">
-            <p className="text-sm font-semibold text-teal-900">
-              Step {stepIndex + 1} of {card.steps.en.length}
-            </p>
-            <p lang="en" className="text-lg font-medium text-teal-950">{card.steps.en[stepIndex]}</p>
-            <p className="text-sm text-teal-900">Do this with the learner, then continue.</p>
-            <div className="grid gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (stepIndex === card.steps.en.length - 1) setGuideFinished(true);
-                  else setStepIndex(stepIndex + 1);
-                }}
-                className="min-h-12 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-              >
-                {stepIndex === card.steps.en.length - 1 ? "Finish practice guide" : "Next step"}
-              </button>
-              {stepIndex > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setStepIndex(stepIndex - 1)}
-                  className="min-h-12 rounded-lg border border-teal-700 px-4 font-semibold text-teal-900 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-                >
-                  Previous step
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-        <div className="grid gap-2">
+      <section
+        aria-labelledby="saved-activity-heading"
+        className="panel grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-8"
+      >
+        <div className="space-y-3">
+          <p role="status" className="tag tag-teal">
+            Activity saved
+          </p>
+          <h3 id="saved-activity-heading" className="text-xl font-semibold">
+            {card.title.en}
+          </h3>
+          <p className="text-sm text-ink-2">
+            <span className="font-semibold text-ink">Focus:</span> {goal.focus}
+          </p>
           <button
             type="button"
             onClick={() => setShowChooser(true)}
-            className="min-h-12 rounded-lg border border-teal-700 px-4 font-semibold text-teal-900 hover:bg-teal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="btn btn-secondary w-full md:w-auto"
           >
             Choose a different activity
           </button>
         </div>
+
+        {guideFinished ? (
+          <div className="space-y-3 rounded-xl border border-line bg-paper/60 p-4" aria-live="polite">
+            <p className="font-semibold">You reached the end of the practice guide.</p>
+            <p className="text-sm text-ink-2">
+              <span className="font-semibold text-ink">Look for:</span> {goal.lookFor}
+            </p>
+            <p className="text-sm text-ink-2">
+              The practice guide does not change reading scores. Another reading check gives new
+              scores; progress compares checks only when they are linked.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Link href={`/assess/${learnerId}`} className="btn btn-primary">
+                Start another reading check
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setStepIndex(0);
+                  setGuideFinished(false);
+                }}
+                className="btn btn-secondary"
+              >
+                Review practice steps
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 rounded-xl border border-line bg-paper/60 p-4" aria-live="polite">
+            <div className="space-y-2">
+              <span className="flex gap-1" aria-hidden="true">
+                {card.steps.en.map((step, index) => (
+                  <span
+                    key={step}
+                    className={`h-1.5 flex-1 rounded-full ${index <= stepIndex ? "bg-teal" : "bg-tick"}`}
+                  />
+                ))}
+              </span>
+              <p className="meta text-xs font-medium">
+                Step {stepIndex + 1} of {total}
+              </p>
+            </div>
+            <p lang="en" className="text-lg font-medium text-ink">
+              {card.steps.en[stepIndex]}
+            </p>
+            <p className="text-sm text-ink-2">Do this with the learner, then continue.</p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {stepIndex > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStepIndex(stepIndex - 1)}
+                  className="btn btn-secondary sm:flex-1"
+                >
+                  Previous step
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (stepIndex === total - 1) setGuideFinished(true);
+                  else setStepIndex(stepIndex + 1);
+                }}
+                className="btn btn-primary sm:flex-1"
+              >
+                {stepIndex === total - 1 ? "Finish practice guide" : "Next step"}
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     );
   }
@@ -170,78 +192,71 @@ export function InterventionPicker({
   return (
     <form onSubmit={save} className="space-y-3">
       <fieldset disabled={saving} className="space-y-3">
-        <legend className="mb-1 text-sm font-semibold">Choose an activity</legend>
-        {INTERVENTION_IDS.map((id) => {
-          const card = INTERVENTIONS[id];
-          return (
-            <label
-              key={id}
-              className="block cursor-pointer rounded-xl border border-neutral-300 p-4 has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-700"
-            >
-              <span className="flex items-start gap-3">
-                <input
-                  type="radio"
-                  name="intervention"
-                  value={id}
-                  checked={selected === id}
-                  onChange={() => setSelected(id)}
-                  className="mt-1 size-4 accent-blue-700"
-                />
-                <span className="min-w-0 space-y-2">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span lang="en" className="font-semibold">
-                      {card.title.en}
+        <legend className="mb-1 text-sm font-medium text-ink-2">Choose an activity</legend>
+        <div className="grid gap-3 md:grid-cols-3">
+          {INTERVENTION_IDS.map((id) => {
+            const card = INTERVENTIONS[id];
+            return (
+              <label key={id} className="choice h-full p-4">
+                <span className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="intervention"
+                    value={id}
+                    checked={selected === id}
+                    onChange={() => setSelected(id)}
+                    className="radio-mark mt-0.5"
+                  />
+                  <span className="min-w-0 space-y-2">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span lang="en" className="font-semibold">
+                        {card.title.en}
+                      </span>
+                      {suggested === id && <span className="tag tag-sun">Suggested activity</span>}
+                      {chosen === id && <span className="tag tag-teal">Chosen activity</span>}
                     </span>
-                    {suggested === id && (
-                      <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
-                        Suggested activity
-                      </span>
-                    )}
-                    {chosen === id && (
-                      <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-900">
-                        Chosen activity
-                      </span>
-                    )}
+                    <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-ink-2 marker:font-mono marker:text-muted">
+                      {card.steps.en.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
                   </span>
-                  <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-neutral-700">
-                    {card.steps.en.map((step) => (
-                      <li key={step}>{step}</li>
-                    ))}
-                  </ol>
                 </span>
-              </span>
-            </label>
-          );
-        })}
+              </label>
+            );
+          })}
+        </div>
       </fieldset>
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-950">
+        <p role="alert" className="alert">
           {error}
         </p>
       )}
-      <p role="status" aria-live="polite" className="text-sm text-neutral-700">
+      <p role="status" aria-live="polite" className="text-sm text-ink-2">
         {chosen ? `Chosen activity: ${INTERVENTIONS[chosen].title.en}` : "No activity saved yet."}
       </p>
-      <button
-        type="submit"
-        disabled={!selected || saving || selected === chosen}
-        className="min-h-12 w-full rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
-      >
-        {saving ? "Saving…" : "Save chosen activity"}
-      </button>
-      {chosen && (
+      <div className="flex flex-col gap-2 sm:flex-row">
         <button
-          type="button"
-          onClick={() => {
-            setSelected(chosen);
-            setShowChooser(false);
-          }}
-          className="min-h-12 w-full rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+          type="submit"
+          disabled={!selected || saving || selected === chosen}
+          className="btn btn-primary w-full sm:w-auto sm:min-w-64"
         >
-          Keep saved activity
+          {saving ? "Saving…" : "Save chosen activity"}
         </button>
-      )}
+        {chosen && (
+          <button
+            type="button"
+            onClick={() => {
+              setSelected(chosen);
+              setShowChooser(false);
+            }}
+            className="btn btn-secondary w-full sm:w-auto"
+          >
+            Keep saved activity
+          </button>
+        )}
+      </div>
     </form>
   );
 }

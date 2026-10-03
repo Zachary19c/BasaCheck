@@ -39,12 +39,12 @@ export function PassagePicker({
   return (
     <div className="space-y-4">
       <fieldset disabled={locked}>
-        <legend className="mb-2 text-sm font-semibold">Language</legend>
+        <legend className="mb-2 text-sm font-medium text-ink-2">Language</legend>
         <div className="grid grid-cols-2 gap-2">
           {LANGUAGES.map((option) => (
             <label
               key={option.value}
-              className="flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-neutral-300 px-3 font-medium has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-900 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+              className="choice flex min-h-12 items-center justify-center px-3 font-medium has-[:checked]:text-teal-deep"
             >
               <input
                 type="radio"
@@ -61,12 +61,12 @@ export function PassagePicker({
       </fieldset>
 
       <fieldset disabled={locked}>
-        <legend className="mb-2 text-sm font-semibold">Passage</legend>
-        <p className="mb-2 text-sm text-neutral-700">
+        <legend className="mb-2 text-sm font-medium text-ink-2">Passage</legend>
+        <p className="mb-2 text-sm text-ink-2">
           Original texts in the Phil-IRI form for this grade. These are not the national test.
         </p>
         {options.length === 0 ? (
-          <p className="rounded-lg border border-neutral-300 p-3 text-sm text-neutral-700">
+          <p className="note-dashed">
             No active passages in this language.
           </p>
         ) : (
@@ -74,7 +74,7 @@ export function PassagePicker({
             {options.map((passage) => (
               <label
                 key={passage.id}
-                className="block cursor-pointer rounded-lg border border-neutral-300 p-3 has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+                className="choice p-3.5"
               >
                 <span className="flex items-start gap-3">
                   <input
@@ -83,15 +83,15 @@ export function PassagePicker({
                     value={passage.id}
                     checked={passageId === passage.id}
                     onChange={() => onPassageChange(passage.id)}
-                    className="mt-1 size-4 accent-blue-700"
+                    className="radio-mark mt-0.5"
                   />
                   <span className="min-w-0">
                     <span className="block font-semibold">{passage.title}</span>
-                    <span className="block text-sm text-neutral-700">
+                    <span className="meta mt-0.5 block">
                       Grade {passage.gradeLevel} {passage.difficulty} · Phil-IRI form ·{" "}
                       {passage.wordCount} words
                     </span>
-                    <span className="mt-1 line-clamp-2 block text-sm text-neutral-600">
+                    <span className="mt-1 line-clamp-2 block text-sm text-muted">
                       {passage.content}
                     </span>
                   </span>
@@ -103,7 +103,7 @@ export function PassagePicker({
       </fieldset>
 
       {locked && (
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-ink-2">
           Language and passage are locked for this assessment. To change them, start a new
           assessment.
         </p>

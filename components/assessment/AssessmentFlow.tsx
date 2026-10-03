@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import type {
   ApiErrorBody,
@@ -13,6 +14,7 @@ import type {
 import type { PassageQuestion } from "@/lib/questions";
 import type { SupportedLanguage } from "@/lib/types";
 import { QuestionBlock } from "@/components/QuestionBlock";
+import { HandIcon } from "@/components/ui/icons";
 import { type PassageOption, PassagePicker } from "./PassagePicker";
 import { Recorder } from "./Recorder";
 import { TapPassage } from "./TapPassage";
@@ -231,100 +233,120 @@ export function AssessmentFlow({
 
   return (
     <div className="space-y-6">
-      <ol aria-label="Assessment steps" className="grid grid-cols-4 gap-1">
+      <ol aria-label="Assessment steps" className="grid grid-cols-4 gap-1.5">
         {steps.map((label, index) => (
           <li
             key={label}
             aria-current={index === currentStep ? "step" : undefined}
-            className={`rounded-lg px-1 py-2 text-center text-xs font-semibold ${
-              index === currentStep ? "bg-teal-700 text-white" : "bg-neutral-100 text-neutral-600"
-            }`}
+            className="flex flex-col gap-1.5"
           >
-            {index + 1}. {label}
+            <span
+              aria-hidden="true"
+              className={`h-1.5 rounded-full ${
+                index < currentStep ? "bg-teal-deep" : index === currentStep ? "bg-teal" : "bg-tick"
+              }`}
+            />
+            <span
+              className={`text-[0.6875rem] leading-tight ${
+                index === currentStep ? "font-semibold text-ink" : "text-muted"
+              }`}
+            >
+              <span className="font-mono">{index + 1}</span> {label}
+            </span>
           </li>
         ))}
       </ol>
 
-      <section aria-labelledby="setup-heading" className="space-y-3">
-        <h2 id="setup-heading" className="text-lg font-bold">
-          Choose the reading
-        </h2>
-        {showPicker ? (
-          <PassagePicker
-            language={language}
-            passageId={passageId}
-            passages={passages}
-            locked={locked}
-            onLanguageChange={changeLanguage}
-            onPassageChange={setPassageId}
-          />
-        ) : (
-          selected && (
-            <p className="rounded-lg bg-neutral-100 p-3 text-sm">
-              {selected.language === "fil" ? "Filipino" : "English"} · {selected.title} ·{" "}
-              {selected.wordCount} words. Language and passage stay locked for this check.
-            </p>
-          )
-        )}
-      </section>
+      {/* Choosing and reading sit side by side on wide screens. */}
+      <div
+        className={`grid gap-6 ${
+          phase.name === "setup" || phase.name === "recording"
+            ? "md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start lg:gap-8"
+            : ""
+        }`}
+      >
+        <section aria-labelledby="setup-heading" className="space-y-3">
+          <h2 id="setup-heading" className="text-lg font-semibold">
+            Choose the reading
+          </h2>
+          {showPicker ? (
+            <PassagePicker
+              language={language}
+              passageId={passageId}
+              passages={passages}
+              locked={locked}
+              onLanguageChange={changeLanguage}
+              onPassageChange={setPassageId}
+            />
+          ) : (
+            selected && (
+              <p className="rounded-xl border border-line bg-sheet p-3 text-sm">
+                {selected.language === "fil" ? "Filipino" : "English"} · {selected.title} ·{" "}
+                {selected.wordCount} words. Language and passage stay locked for this check.
+              </p>
+            )
+          )}
+        </section>
 
-      {(phase.name === "setup" || phase.name === "recording") &&
-        (selected ? (
-          <section
-            aria-labelledby="read-heading"
-            className="space-y-4 rounded-xl border border-neutral-300 p-4"
-          >
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-              <div>
-                <h2 id="read-heading" className="text-lg font-bold">
-                  {selected.title}
-                </h2>
-                <p lang={selected.language} className="mt-1 text-sm font-semibold text-neutral-700">
-                  {INSTRUCTIONS[selected.language]}
-                </p>
-              </div>
-              {!startingDemo && (
-                <div className="sm:w-44">
-                  <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
+        {(phase.name === "setup" || phase.name === "recording") &&
+          (selected ? (
+            <section
+              aria-labelledby="read-heading"
+              className="panel space-y-5 p-5 md:sticky md:top-6"
+            >
+              {/* Title full width, then the recorder above the passage so it never needs a scroll. */}
+              <div className="space-y-4">
+                <div>
+                  <h2 id="read-heading" className="text-xl font-semibold">
+                    {selected.title}
+                  </h2>
+                  <p lang={selected.language} className="mt-1 text-sm font-medium text-teal-deep">
+                    {INSTRUCTIONS[selected.language]}
+                  </p>
                 </div>
-              )}
-            </div>
-            <p lang={selected.language} className="text-xl leading-relaxed">
-              {selected.content}
-            </p>
-            {phase.name === "setup" && (
-              <button
-                type="button"
-                onClick={startTapMode}
-                className="min-h-12 w-full rounded-lg border border-teal-700 px-4 font-semibold text-teal-800 hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-              >
-                Mark words offline
-              </button>
-            )}
-            {demoMode && canUseFixture && phase.name === "setup" && (
-              <details className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-950">
-                <summary className="cursor-pointer font-semibold">Demo Mode: use a sample transcript</summary>
-                <p className="mt-2 text-sm">
-                  This is a sample, not a transcript of the learner’s recording. Use it only to
-                  demonstrate the assessment workflow.
-                </p>
+                {!startingDemo && (
+                  <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
+                )}
+              </div>
+              <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
+                {selected.content}
+              </p>
+              {phase.name === "setup" && (
                 <button
                   type="button"
-                  onClick={startDemoAssessment}
-                  disabled={startingDemo}
-                  className="mt-3 min-h-12 w-full rounded-lg border border-amber-700 px-4 font-semibold hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={startTapMode}
+                  className="btn btn-secondary w-full"
                 >
-                  {startingDemo ? "Loading the sample transcript…" : "Use sample transcript"}
+                  <HandIcon size={18} />
+                  Mark words offline
                 </button>
-              </details>
-            )}
-          </section>
-        ) : (
-          <p className="text-sm text-neutral-700">Choose a passage to start recording.</p>
-        ))}
+              )}
+              {demoMode && canUseFixture && phase.name === "setup" && (
+                <details className="note-dashed">
+                  <summary className="cursor-pointer font-semibold text-ink">Demo Mode: use a sample transcript</summary>
+                  <p className="mt-2 text-sm">
+                    This is a sample, not a transcript of the learner’s recording. Use it only to
+                    demonstrate the assessment workflow.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={startDemoAssessment}
+                    disabled={startingDemo}
+                    className="btn btn-secondary mt-3 w-full"
+                  >
+                    {startingDemo ? "Loading the sample transcript…" : "Use sample transcript"}
+                  </button>
+                </details>
+              )}
+            </section>
+          ) : (
+            <p className="note-dashed text-ink-2">Choose a passage to start recording.</p>
+          ))}
+      </div>
 
       {phase.name === "processing" && (
-        <p role="status" aria-live="polite" className="rounded-lg bg-neutral-100 p-4 font-medium">
+        <p role="status" aria-live="polite" className="panel flex items-center gap-4 p-4 font-medium">
+          <Image src="/bai.jpg" alt="" width={96} height={96} className="mascot splash-heron-idle size-11 shrink-0" />
           {active?.demoTranscript
             ? "Loading the prepared transcript…"
             : "Transcribing the recording…"}
@@ -358,20 +380,20 @@ export function AssessmentFlow({
       {phase.name === "confirmed" && active && (
         <>
           <section aria-labelledby="confirmed-heading" className="space-y-3">
-            <h2 id="confirmed-heading" className="text-lg font-bold">
+            <h2 id="confirmed-heading" className="text-lg font-semibold">
               Transcript confirmed
             </h2>
             {active.offlineTap && (
-              <p className="inline-block rounded bg-teal-100 px-2 py-0.5 text-sm font-semibold text-teal-900">
+              <p className="tag tag-dashed">
                 Offline tap · teacher-marked words
               </p>
             )}
             {active.demoTranscript && (
-              <p className="inline-block rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900">
+              <p className="tag tag-dashed">
                 Demo Mode · prepared transcript
               </p>
             )}
-            <p className="rounded-lg bg-neutral-100 p-3">{phase.verifiedTranscript}</p>
+            <p className="rounded-xl border border-line bg-sheet p-3">{phase.verifiedTranscript}</p>
             <button
               type="button"
               onClick={() =>
@@ -381,14 +403,14 @@ export function AssessmentFlow({
                   draft: phase.verifiedTranscript,
                 })
               }
-              className="min-h-12 w-full rounded-lg border border-neutral-400 px-4 font-semibold hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+              className="btn btn-secondary w-full sm:w-auto"
             >
               Edit transcript
             </button>
           </section>
 
           <section aria-labelledby="questions-heading" className="space-y-2">
-            <h2 id="questions-heading" className="text-lg font-bold">
+            <h2 id="questions-heading" className="text-lg font-semibold">
               Comprehension questions
             </h2>
             <QuestionBlock
@@ -404,18 +426,18 @@ export function AssessmentFlow({
         <section
           role="alert"
           aria-labelledby="error-heading"
-          className="space-y-3 rounded-xl border border-red-300 bg-red-50 p-4"
+          className="alert space-y-3 p-4"
         >
           <h2 id="error-heading" className="font-bold text-red-950">
             {active?.demoTranscript ? "This check could not continue" : "This recording could not be used"}
           </h2>
           <p className="text-red-950">{phase.message}</p>
           <p className="text-sm text-red-950">No reading score was saved.</p>
-          <div className="grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <button
               type="button"
               onClick={startOver}
-              className="min-h-12 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              className="btn btn-primary"
             >
               Try again
             </button>
@@ -424,7 +446,7 @@ export function AssessmentFlow({
                 type="button"
                 onClick={startDemoAssessment}
                 disabled={startingDemo}
-                className="min-h-12 rounded-lg border border-amber-400 bg-amber-50 px-4 font-semibold text-amber-950 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn btn-secondary"
               >
                 Use sample transcript (Demo Mode)
               </button>

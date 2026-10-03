@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ProvenanceLabels } from "@/components/ProvenanceLabels";
+import { ArrowRightIcon } from "@/components/ui/icons";
+import { TickBar } from "@/components/ui/TickGauge";
 import {
   buildComparisons,
   COMPARISON_NOTE,
@@ -48,33 +50,45 @@ function percent(value: number | null) {
   return value === null ? "Not recorded" : `${formatNumber(value)}%`;
 }
 
+function MeasureRow({ label, value }: { label: string; value: number | null }) {
+  return (
+    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1">
+      <span className="text-ink-2">{label}</span>
+      <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{percent(value)}</span>
+      <span className="col-span-2">
+        <TickBar value={value} ticks={32} />
+      </span>
+    </li>
+  );
+}
+
 function CheckSummary({ title, assessment }: { title: string; assessment: AssessmentRow }) {
   const chosen = assessment.interventionId ? INTERVENTIONS[assessment.interventionId] : null;
   return (
-    <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
+    <div className="space-y-3 rounded-xl border border-line bg-paper/60 p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h4 className="font-semibold">{title}</h4>
-        <p className="text-xs text-neutral-600">{dateLabel(assessment.createdAt)}</p>
+        <p className="meta text-xs">{dateLabel(assessment.createdAt)}</p>
       </div>
       <ProvenanceLabels assessment={assessment} />
-      <ul className="space-y-1 text-sm">
-        <li>Passage Reading Accuracy: {percent(assessment.accuracyPercent)}</li>
-        <li>Comprehension: {percent(assessment.comprehensionPercent)}</li>
-        <li>
-          Reading Rate:{" "}
-          {assessment.wpm === null ? "Not recorded" : `${formatNumber(assessment.wpm)} words per minute`}
+      <ul className="space-y-3 text-sm">
+        <MeasureRow label="Passage Reading Accuracy" value={assessment.accuracyPercent} />
+        <MeasureRow label="Comprehension" value={assessment.comprehensionPercent} />
+        <li className="flex items-baseline justify-between gap-3">
+          <span className="text-ink-2">Reading Rate</span>
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
+            {assessment.wpm === null ? "Not recorded" : `${formatNumber(assessment.wpm)} words per minute`}
+          </span>
         </li>
       </ul>
       {chosen && (
-        <p className="text-sm text-neutral-700">
-          Chosen activity: <span lang="en">{chosen.title.en}</span>
+        <p className="text-sm text-ink-2">
+          Chosen activity: <span lang="en" className="font-medium text-ink">{chosen.title.en}</span>
         </p>
       )}
-      <Link
-        href={`/results/${assessment.id}`}
-        className="inline-block text-sm font-medium text-blue-800 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-      >
+      <Link href={`/results/${assessment.id}`} className="link-quiet">
         View results
+        <ArrowRightIcon size={16} />
       </Link>
     </div>
   );
@@ -83,45 +97,49 @@ function CheckSummary({ title, assessment }: { title: string; assessment: Assess
 function ComparisonCard({ result, title }: { result: ComparisonResult; title: string }) {
   const demo = includesDemo(result);
   return (
-    <article className="space-y-3 rounded-2xl border border-neutral-300 bg-white p-4">
-      <p className="text-sm font-medium text-neutral-700">
+    <article className="panel h-full space-y-4 p-5">
+      <p className="meta text-sm">
         {title} · {result.baseline.language === "fil" ? "Filipino" : "English"}
       </p>
 
       {result.kind === "pair" && (
         <>
-          <h3 className="text-lg font-bold">
+          <h3 className="text-lg font-semibold">
             {demo ? "Demo score example" : "Change between two checks"}
           </h3>
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-ink-2">
             {demo
               ? "This comparison includes a sample transcript or preloaded example. These scores do not show this learner’s reading progress or what the chosen activity achieved."
               : COMPARISON_NOTE}
           </p>
-          <ul className="space-y-1 rounded-xl border border-neutral-200 p-3 text-sm font-medium">
+          <ul className="space-y-1.5 rounded-xl bg-teal-wash/70 p-4 text-sm font-medium leading-relaxed tabular-nums text-teal-deep">
             {result.lines.map((line) => (
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
-          <CheckSummary title="Follow-up" assessment={result.followUp} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <CheckSummary title="Baseline" assessment={result.baseline} />
+            <CheckSummary title="Follow-up" assessment={result.followUp} />
+          </div>
         </>
       )}
 
       {result.kind === "mismatch" && (
         <>
-          <p role="note" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+          <p role="note" className="note-dashed">
             {MISMATCH_MESSAGE}
           </p>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
-          <CheckSummary title="Unlinked follow-up" assessment={result.followUp} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <CheckSummary title="Baseline" assessment={result.baseline} />
+            <CheckSummary title="Unlinked follow-up" assessment={result.followUp} />
+          </div>
         </>
       )}
 
       {result.kind === "none" && (
         <>
           <CheckSummary title="Reading check" assessment={result.baseline} />
-          <p className="text-sm text-neutral-700">{NO_FOLLOW_UP_MESSAGE}</p>
+          <p className="text-sm text-ink-2">{NO_FOLLOW_UP_MESSAGE}</p>
         </>
       )}
     </article>
@@ -147,35 +165,49 @@ export function ProgressView({ assessments, passageTitles }: ProgressViewProps) 
     );
   }
 
+  // Linked pairs read across the page; single checks sit in a grid on wide screens.
+  function renderList(results: ComparisonResult[]) {
+    const linked = results.filter((result) => result.kind !== "none");
+    const single = results.filter((result) => result.kind === "none");
+    return (
+      <>
+        {linked.map(renderCard)}
+        {single.length > 0 && (
+          <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">{single.map(renderCard)}</div>
+        )}
+      </>
+    );
+  }
+
   return (
-    <section aria-labelledby="progress-comparison-heading" className="space-y-5">
+    <section aria-labelledby="progress-comparison-heading" className="space-y-6">
       <div>
         <h2 id="progress-comparison-heading" className="text-lg font-semibold">
           Learner progress
         </h2>
-        <p className="mt-1 text-sm text-neutral-600">
+        <p className="mt-1 text-sm text-ink-2">
           Recorded readings and teacher-marked checks appear here. Demo scores are kept separately below.
         </p>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h3 className="font-semibold">Real reading checks</h3>
         {realComparisons.length === 0 ? (
-          <p className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
+          <p className="note-dashed text-ink-2">
             No real reading checks yet. Complete a learner recording or teacher-marked check to see progress here.
           </p>
         ) : (
-          realComparisons.map(renderCard)
+          renderList(realComparisons)
         )}
       </div>
       {demoComparisons.length > 0 && (
-        <details className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
-          <summary className="cursor-pointer font-semibold text-amber-950">
+        <details className="group rounded-[14px] border border-dashed border-ink/40 bg-sheet/60 p-5">
+          <summary className="cursor-pointer font-semibold text-ink">
             Demo and sample checks ({demoComparisons.length})
           </summary>
-          <p className="mt-3 text-sm text-amber-950">
+          <p className="mt-3 text-sm text-ink-2">
             These use prepared transcripts or preloaded example scores. They are for exploring the app, not measuring this learner’s actual reading progress.
           </p>
-          <div className="mt-4 space-y-3">{demoComparisons.map(renderCard)}</div>
+          <div className="mt-4 space-y-4">{renderList(demoComparisons)}</div>
         </details>
       )}
     </section>

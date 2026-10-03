@@ -85,7 +85,7 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
 
   if (questions.length !== 3) {
     return (
-      <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-950">
+      <p role="alert" className="alert">
         {copy.missing}
       </p>
     );
@@ -93,41 +93,45 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
 
   return (
     <form onSubmit={submit} lang={language} className="space-y-4">
-      <p className="text-sm text-neutral-700">{copy.intro}</p>
-      {questions.map((question, questionIndex) => (
-        <fieldset
-          key={question.id}
-          disabled={submitting}
-          className="space-y-2 rounded-xl border border-neutral-300 p-4"
-        >
-          <legend className="px-1 font-semibold">
-            <span className="block text-xs font-medium text-neutral-600">
-              {copy.question} {questionIndex + 1}
-              {copy.levels[questionIndex] ? ` · ${copy.levels[questionIndex]}` : ""}
-            </span>
-            {question.prompt}
-          </legend>
-          {question.choices.map((choice, choiceIndex) => (
-            <label
-              key={choiceIndex}
-              className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-neutral-300 px-3 has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-700 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value={choiceIndex}
-                checked={answers[questionIndex] === choiceIndex}
-                onChange={() => choose(questionIndex, choiceIndex)}
-                className="size-4 accent-blue-700"
-              />
-              <span>{choice}</span>
-            </label>
-          ))}
-        </fieldset>
-      ))}
+      <p className="text-sm text-ink-2">{copy.intro}</p>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {questions.map((question, questionIndex) => (
+          <fieldset
+            key={question.id}
+            disabled={submitting}
+            className="panel min-w-0 p-4"
+          >
+            <legend className="float-left mb-3 w-full font-semibold">
+              <span className="meta mb-1 block text-xs">
+                {copy.question} {questionIndex + 1}
+                {copy.levels[questionIndex] ? ` · ${copy.levels[questionIndex]}` : ""}
+              </span>
+              {question.prompt}
+            </legend>
+            <div className="clear-both grid gap-2 md:grid-cols-3 lg:grid-cols-1">
+              {question.choices.map((choice, choiceIndex) => (
+                <label
+                  key={choiceIndex}
+                  className="choice flex min-h-12 items-center gap-3 px-3"
+                >
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    value={choiceIndex}
+                    checked={answers[questionIndex] === choiceIndex}
+                    onChange={() => choose(questionIndex, choiceIndex)}
+                    className="radio-mark"
+                  />
+                  <span>{choice}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+      </div>
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-950">
+        <p role="alert" className="alert">
           {error}
         </p>
       )}
@@ -135,7 +139,7 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
       <button
         type="submit"
         disabled={!complete || submitting}
-        className="min-h-12 w-full rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+        className="btn btn-primary w-full sm:w-auto sm:min-w-64"
       >
         {submitting ? copy.submitting : copy.submit}
       </button>
