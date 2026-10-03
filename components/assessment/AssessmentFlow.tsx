@@ -14,10 +14,11 @@ import type {
 import type { PassageQuestion } from "@/lib/questions";
 import type { SupportedLanguage } from "@/lib/types";
 import { QuestionBlock } from "@/components/QuestionBlock";
-import { HandIcon } from "@/components/ui/icons";
+import { HandIcon, SparkIcon } from "@/components/ui/icons";
 import { type PassageOption, PassagePicker } from "./PassagePicker";
 import { Recorder } from "./Recorder";
 import { TapPassage } from "./TapPassage";
+import { LivePractice, LiveRecordingGuide } from "./LivePractice";
 import { TranscriptReview } from "./TranscriptReview";
 
 type ActiveAssessment = {
@@ -76,6 +77,10 @@ export function AssessmentFlow({
   const [savingTap, setSavingTap] = useState(false);
   const [active, setActive] = useState<ActiveAssessment | null>(null);
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  // Live practice replaces the reading card controls until the teacher closes it.
+  const [practicing, setPracticing] = useState(false);
+  // Color the passage live while a scored recording runs (a guide only).
+  const [liveColors, setLiveColors] = useState(true);
   const creatingRef = useRef(false);
   // Recorder callbacks finish after later renders, so they read the current assessment here.
   const activeRef = useRef<ActiveAssessment | null>(null);
@@ -304,14 +309,60 @@ export function AssessmentFlow({
                     {INSTRUCTIONS[selected.language]}
                   </p>
                 </div>
-                {!startingDemo && (
+                {!startingDemo && !practicing && (
                   <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
                 )}
+                {phase.name === "setup" && !practicing && (
+                  <label className="flex cursor-pointer items-start gap-2 text-sm text-ink-2">
+                    <input
+                      type="checkbox"
+                      checked={liveColors}
+                      onChange={(event) => setLiveColors(event.target.checked)}
+                      className="mt-0.5 size-4 accent-teal"
+                    />
+                    <span>
+                      <span className="font-medium text-ink">Live colors while recording.</span> Words
+                      turn green as the learner reads. Uses the browser&apos;s speech service.
+                    </span>
+                  </label>
+                )}
+                {phase.name === "setup" && !practicing && (
+                  <button
+                    type="button"
+                    onClick={() => setPracticing(true)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-teal/30 bg-teal-wash/70 p-3 text-left transition-colors hover:bg-teal-wash"
+                  >
+                    <SparkIcon size={18} className="shrink-0 text-teal" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2 font-semibold text-teal-deep">
+                        Live practice <span className="tag tag-sun">Beta</span>
+                      </span>
+                      <span className="block text-sm text-ink-2">
+                        Words turn green as the learner reads them correctly.
+                      </span>
+                    </span>
+                  </button>
+                )}
               </div>
-              <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
-                {selected.content}
-              </p>
-              {phase.name === "setup" && (
+              {practicing && phase.name === "setup" ? (
+                <LivePractice
+                  key={selected.id}
+                  content={selected.content}
+                  language={selected.language}
+                  onClose={() => setPracticing(false)}
+                />
+              ) : phase.name === "recording" && liveColors ? (
+                <LiveRecordingGuide
+                  key={selected.id}
+                  content={selected.content}
+                  language={selected.language}
+                />
+              ) : (
+                <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
+                  {selected.content}
+                </p>
+              )}
+              {phase.name === "setup" && !practicing && (
                 <button
                   type="button"
                   onClick={startTapMode}
@@ -321,7 +372,7 @@ export function AssessmentFlow({
                   Mark words offline
                 </button>
               )}
-              {demoMode && canUseFixture && phase.name === "setup" && (
+              {demoMode && canUseFixture && phase.name === "setup" && !practicing && (
                 <details className="note-dashed">
                   <summary className="cursor-pointer font-semibold text-ink">Demo Mode: use a sample transcript</summary>
                   <p className="mt-2 text-sm">
@@ -340,7 +391,9 @@ export function AssessmentFlow({
               )}
             </section>
           ) : (
-            <p className="note-dashed text-ink-2">Choose a passage to start recording.</p>
+            <p className="note-dashed text-ink-2">
+            Choose a passage to start recording, mark words offline, or try live practice.
+          </p>
           ))}
       </div>
 

@@ -14,7 +14,7 @@ export function AppHeader() {
       <div
         className="mx-auto flex max-w-md items-center justify-between gap-4 px-6 pt-6 pb-2 sm:max-w-6xl sm:px-10 md:pt-8"
       >
-        <Link href={landing ? "/" : "/dashboard"} className="flex items-center gap-2.5">
+        <Link href="/" aria-label="BasaCheck home" className="flex items-center gap-2.5">
           <Image src="/bai.jpg" alt="" width={64} height={64} className="size-8 rounded-[9px]" />
           <span className="title-display text-[1.375rem] text-ink">BasaCheck</span>
         </Link>

@@ -71,7 +71,7 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
 
   const { data: passage } = await supabase
     .from("passages")
-    .select("title")
+    .select("title, content")
     .eq("id", assessment.passageId)
     .maybeSingle();
 
@@ -212,6 +212,8 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
           <InterventionPicker
             assessmentId={assessment.id}
             language={assessment.language}
+            passage={(passage as { content: string } | null)?.content}
+            differences={differences}
             suggested={suggested}
             chosen={assessment.interventionId}
             learnerId={assessment.learnerId}
