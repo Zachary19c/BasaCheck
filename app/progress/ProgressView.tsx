@@ -19,6 +19,25 @@ type ProgressViewProps = {
   passageTitles: Record<string, string>;
 };
 
+function includesDemo(result: ComparisonResult) {
+  return (
+    result.baseline.seededDemo ||
+    result.baseline.demoTranscript ||
+    (result.kind !== "none" && (result.followUp.seededDemo || result.followUp.demoTranscript))
+  );
+}
+
+function realCheckFromMixedPair(result: ComparisonResult): ComparisonResult | null {
+  if (result.kind === "none" || !includesDemo(result)) return null;
+  const baselineIsReal = !result.baseline.seededDemo && !result.baseline.demoTranscript;
+  const followUpIsReal = !result.followUp.seededDemo && !result.followUp.demoTranscript;
+  if (result.kind === "pair" && baselineIsReal) {
+    return { kind: "none", baseline: result.baseline };
+  }
+  if (followUpIsReal) return { kind: "none", baseline: result.followUp };
+  return null;
+}
+
 function dateLabel(value: string) {
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(value),
@@ -62,6 +81,7 @@ function CheckSummary({ title, assessment }: { title: string; assessment: Assess
 }
 
 function ComparisonCard({ result, title }: { result: ComparisonResult; title: string }) {
+  const demo = includesDemo(result);
   return (
     <article className="space-y-3 rounded-2xl border border-neutral-300 bg-white p-4">
       <p className="text-sm font-medium text-neutral-700">
@@ -71,13 +91,11 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
       {result.kind === "pair" && (
         <>
           <h3 className="text-lg font-bold">
-            {result.baseline.seededDemo || result.followUp.seededDemo
-              ? "Sample progress comparison"
-              : "Observed change between readings"}
+            {demo ? "Demo score example" : "Change between two checks"}
           </h3>
           <p className="text-sm text-neutral-700">
-            {result.baseline.seededDemo || result.followUp.seededDemo
-              ? "These preloaded demo scores are examples. They do not show what the activity you selected achieved."
+            {demo
+              ? "This comparison includes a sample transcript or preloaded example. These scores do not show this learner’s reading progress or what the chosen activity achieved."
               : COMPARISON_NOTE}
           </p>
           <ul className="space-y-1 rounded-xl border border-neutral-200 p-3 text-sm font-medium">
@@ -102,7 +120,7 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
       {result.kind === "none" && (
         <>
-          <CheckSummary title="Baseline" assessment={result.baseline} />
+          <CheckSummary title="Reading check" assessment={result.baseline} />
           <p className="text-sm text-neutral-700">{NO_FOLLOW_UP_MESSAGE}</p>
         </>
       )}
@@ -112,22 +130,53 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
 
 export function ProgressView({ assessments, passageTitles }: ProgressViewProps) {
   const comparisons = buildComparisons(assessments);
+  const realComparisons = comparisons.flatMap((result) => {
+    if (!includesDemo(result)) return [result];
+    const realCheck = realCheckFromMixedPair(result);
+    return realCheck ? [realCheck] : [];
+  });
+  const demoComparisons = comparisons.filter(includesDemo);
+
+  function renderCard(result: ComparisonResult) {
+    return (
+      <ComparisonCard
+        key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
+        result={result}
+        title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
+      />
+    );
+  }
 
   return (
-    <section aria-labelledby="progress-comparison-heading" className="space-y-4">
-      <h2 id="progress-comparison-heading" className="text-lg font-semibold">
-        Progress comparison
-      </h2>
-      {comparisons.length === 0 ? (
-        <p className="text-sm text-neutral-600">No completed checks yet.</p>
-      ) : (
-        comparisons.map((result) => (
-          <ComparisonCard
-            key={`${result.kind}:${result.baseline.id}:${result.kind === "none" ? "" : result.followUp.id}`}
-            result={result}
-            title={passageTitles[result.baseline.passageId] ?? "Reading passage"}
-          />
-        ))
+    <section aria-labelledby="progress-comparison-heading" className="space-y-5">
+      <div>
+        <h2 id="progress-comparison-heading" className="text-lg font-semibold">
+          Learner progress
+        </h2>
+        <p className="mt-1 text-sm text-neutral-600">
+          Recorded readings and teacher-marked checks appear here. Demo scores are kept separately below.
+        </p>
+      </div>
+      <div className="space-y-3">
+        <h3 className="font-semibold">Real reading checks</h3>
+        {realComparisons.length === 0 ? (
+          <p className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
+            No real reading checks yet. Complete a learner recording or teacher-marked check to see progress here.
+          </p>
+        ) : (
+          realComparisons.map(renderCard)
+        )}
+      </div>
+      {demoComparisons.length > 0 && (
+        <details className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+          <summary className="cursor-pointer font-semibold text-amber-950">
+            Demo and sample checks ({demoComparisons.length})
+          </summary>
+          <p className="mt-3 text-sm text-amber-950">
+            These use prepared transcripts or preloaded example scores. They are for exploring the app, not measuring this learner’s actual reading progress.
+          </p>
+          <div className="mt-4 space-y-3">{demoComparisons.map(renderCard)}</div>
+        </details>
       )}
     </section>
   );
