@@ -157,7 +157,6 @@ export function Recorder({ onStart, onRecorded, onError }: RecorderProps) {
       className="btn btn-primary w-full"
     >
       <MicIcon size={18} />
-      <MicIcon size={18} />
       {state === "starting" ? "Starting microphone…" : "Start recording"}
     </button>
   );

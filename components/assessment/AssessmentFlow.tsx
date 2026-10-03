@@ -296,7 +296,7 @@ export function AssessmentFlow({
                 </p>
               </div>
               {!startingDemo && (
-                <div className="sm:w-44">
+                <div className="sm:w-56">
                   <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
                 </div>
               )}
