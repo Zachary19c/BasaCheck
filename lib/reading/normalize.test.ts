@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalize } from "./normalize";
 
 const PRIMARY_PASSAGE =
-  "Maagang gumising si Ana upang tulungan ang kanyang ina. Pagkatapos kumain, nagpunta siya sa paaralan kasama ang kanyang kaibigan.";
+  "Maagang gumising si Ana upang tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.";
 
 describe("normalize", () => {
   it("lowercases, strips punctuation and splits on whitespace", () => {
@@ -14,13 +14,11 @@ describe("normalize", () => {
     ]);
   });
 
-  it("counts the primary Filipino passage as 19 tokens, not 17", () => {
+  it("counts the Grade 2 Filipino passage as 60 tokens, with one upang", () => {
     const tokens = normalize(PRIMARY_PASSAGE);
-    expect(tokens).toHaveLength(19);
-    expect(tokens).toEqual([
-      "maagang", "gumising", "si", "ana", "upang", "tulungan", "ang", "kanyang", "ina",
-      "pagkatapos", "kumain", "nagpunta", "siya", "sa", "paaralan", "kasama", "ang", "kanyang", "kaibigan",
-    ]);
+    expect(tokens).toHaveLength(60);
+    expect(tokens.slice(0, 5)).toEqual(["maagang", "gumising", "si", "ana", "upang"]);
+    expect(tokens.filter((token) => token === "upang")).toEqual(["upang"]);
   });
 
   it("deletes punctuation inside words instead of splitting, like seed.sql", () => {

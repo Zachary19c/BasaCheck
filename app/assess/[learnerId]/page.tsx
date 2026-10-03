@@ -33,22 +33,21 @@ export default async function AssessPage({
   if (!isUuid(learnerId)) notFound();
 
   const supabase = createClient();
-  const [learnerResult, passagesResult] = await Promise.all([
-    supabase
-      .from("learners")
-      .select("id, display_name, grade_level")
-      .eq("id", learnerId)
-      .maybeSingle(),
-    supabase
-      .from("passages")
-      .select("id, title, content, language, grade_level, difficulty, word_count")
-      .eq("is_active", true)
-      .order("title"),
-  ]);
-  if (learnerResult.error || passagesResult.error) {
-    throw new Error("Could not load the learner and passages.");
-  }
+  const learnerResult = await supabase
+    .from("learners")
+    .select("id, display_name, grade_level")
+    .eq("id", learnerId)
+    .maybeSingle();
+  if (learnerResult.error) throw new Error("Could not load the learner and passages.");
   if (!learnerResult.data) notFound();
+
+  const passagesResult = await supabase
+    .from("passages")
+    .select("id, title, content, language, grade_level, difficulty, word_count")
+    .eq("is_active", true)
+    .eq("grade_level", learnerResult.data.grade_level)
+    .order("title");
+  if (passagesResult.error) throw new Error("Could not load the learner and passages.");
 
   const learner = learnerResult.data as { display_name: string; grade_level: number };
   const passages: PassageOption[] = (passagesResult.data as PassageRow[]).map((row) => ({

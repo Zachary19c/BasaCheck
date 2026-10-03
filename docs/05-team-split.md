@@ -4,7 +4,7 @@ Freeze shared contracts in the first 30 minutes. Integrate by hour 8. `01-mvp-pr
 
 | Member | Ownership | Done when |
 | --- | --- | --- |
-| 1 | Teacher shell + seeded content | Ana dashboard, schema/RLS lockdown, four passages and twelve questions |
+| 1 | Teacher shell + seeded content | Learner dashboard, schema/RLS lockdown, passages and questions for Grades 2, 4, and 6 |
 | 2 | Assessment + speech + transcript review | Language/passage selectors, recording, offline tap, speech integration, confirmation gate and error states |
 | 3 | Reading engine + fixtures | Deterministic alignment/metrics/support functions, tap transcript builder, matching fixtures, meaningful scoring tests |
 | 4 | Questions + results + progress | Passage-specific questions, server scoring, intervention save, labeled linked comparison including Offline tap |
@@ -27,13 +27,13 @@ Hour 1 exit: capture test audio; return live or explicitly labeled fixture respo
 
 Own `lib/reading/{normalize,align,metrics,support,taps}.ts`, `fixture-fil.ts`, `fixture-en.ts`, and scoring tests. Agree deterministic alignment tie-breaks. Export `scoreReading({expectedText, transcript, durationSeconds})`, `transcriptFromTaps`, and `supportArea(accuracyPercent, comprehensionPercent)` returning accuracy/comprehension/null. Never use WPM to classify support. `transcriptFromTaps` keeps unmarked words, omits a blank mark, and normalizes a typed replacement.
 
-Fixtures are keyed by passage ID, with their own duration and language, for all four passages. Seed scripts and fixture generation use the same token counting. Help Member 4 render word differences after the engine is stable.
+Fixtures are keyed by passage ID, with their own duration and language, for every seeded passage. Seed scripts and fixture generation use the same token counting. Help Member 4 render word differences after the engine is stable.
 
 Meaningful checks before integration:
 
 - Identical passage yields 100%; substitution/omission/insertion produce the expected events.
-- Primary full passage is 19 tokens; only upang → para yields 18/19 accuracy.
-- 19 spoken words in 20 seconds yields 57 WPM.
+- Primary full passage is 60 tokens; only upang → para yields 59/60 accuracy.
+- 60 spoken words in 60 seconds yields 60 WPM.
 - Comprehension 1/3 takes priority; comprehension ≥60 and accuracy <90 suggests accuracy; otherwise null, regardless of WPM.
 - Empty input/nonpositive duration is rejected; both language fixtures match their passage.
 

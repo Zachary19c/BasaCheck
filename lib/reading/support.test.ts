@@ -3,7 +3,7 @@ import { comprehension, scoreReading } from "./metrics";
 import { supportArea } from "./support";
 
 const PRIMARY_PASSAGE =
-  "Maagang gumising si Ana upang tulungan ang kanyang ina. Pagkatapos kumain, nagpunta siya sa paaralan kasama ang kanyang kaibigan.";
+  "Maagang gumising si Ana upang tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.";
 
 describe("supportArea (demo rules)", () => {
   it("prioritizes comprehension at 1/3, even with high accuracy", () => {

@@ -3,8 +3,9 @@ import { comprehension, ReadingInputError, scoreReading } from "./metrics";
 import { normalize } from "./normalize";
 
 const PRIMARY_PASSAGE =
-  "Maagang gumising si Ana upang tulungan ang kanyang ina. Pagkatapos kumain, nagpunta siya sa paaralan kasama ang kanyang kaibigan.";
+  "Maagang gumising si Ana upang tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.";
 const PARA_READING = PRIMARY_PASSAGE.replace("upang", "para");
+const PASSAGE_TOKENS = normalize(PRIMARY_PASSAGE).length;
 
 function expectInputError(fn: () => unknown, code: ReadingInputError["code"]) {
   try {
@@ -22,21 +23,21 @@ describe("scoreReading", () => {
     const result = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PRIMARY_PASSAGE,
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
     expect(result.accuracyPercent).toBe(100);
-    expect(result.events).toHaveLength(19);
+    expect(result.events).toHaveLength(PASSAGE_TOKENS);
     expect(result.events.every((e) => e.type === "match")).toBe(true);
   });
 
-  it("gives 18/19 when only upang is read as para", () => {
+  it("gives 59/60 when only upang is read as para", () => {
     const result = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PARA_READING,
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
-    expect(result.accuracyPercent).toBe((18 * 100) / 19);
-    expect(result.accuracyPercent).toBeCloseTo(94.74, 2);
+    expect(result.accuracyPercent).toBe(((PASSAGE_TOKENS - 1) * 100) / PASSAGE_TOKENS);
+    expect(result.accuracyPercent).toBeCloseTo(98.33, 2);
     expect(result.events.filter((e) => e.type !== "match")).toEqual([
       { type: "substitution", expected: "upang", spoken: "para" },
     ]);
@@ -46,7 +47,7 @@ describe("scoreReading", () => {
     const { events } = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PARA_READING,
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
     expect(events).toEqual(
       normalize(PRIMARY_PASSAGE).map((token) =>
@@ -57,47 +58,47 @@ describe("scoreReading", () => {
     );
   });
 
-  it("gives 57 WPM for 19 spoken words in 20 seconds", () => {
+  it("gives 60 WPM for 60 spoken words in 60 seconds", () => {
     const result = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PARA_READING,
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
-    expect(result.wpm).toBe(57);
+    expect(result.wpm).toBe(60);
   });
 
   it("shows insertions without lowering accuracy, and counts them as spoken words", () => {
     const result = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PRIMARY_PASSAGE.replace("si Ana", "si Ana Ana"),
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
     expect(result.accuracyPercent).toBe(100);
     expect(result.events.filter((e) => e.type === "insertion")).toEqual([
       { type: "insertion", spoken: "ana" },
     ]);
-    expect(result.wpm).toBe((20 * 60) / 20);
+    expect(result.wpm).toBe(((PASSAGE_TOKENS + 1) * 60) / 60);
   });
 
   it("lowers accuracy for an omission and uses only spoken words for rate", () => {
     const result = scoreReading({
       expectedText: PRIMARY_PASSAGE,
       transcript: PRIMARY_PASSAGE.replace("ang kanyang ina", "ang ina"),
-      durationSeconds: 20,
+      durationSeconds: 60,
     });
-    expect(result.accuracyPercent).toBe((18 * 100) / 19);
+    expect(result.accuracyPercent).toBe(((PASSAGE_TOKENS - 1) * 100) / PASSAGE_TOKENS);
     expect(result.events.filter((e) => e.type === "omission")).toEqual([
       { type: "omission", expected: "kanyang" },
     ]);
-    expect(result.wpm).toBe((18 * 60) / 20);
+    expect(result.wpm).toBe(((PASSAGE_TOKENS - 1) * 60) / 60);
   });
 
   it("recomputes measurements from a teacher-corrected transcript", () => {
     const asr = PRIMARY_PASSAGE.replace("tulungan", "tulungin").replace("upang", "para");
-    const before = scoreReading({ expectedText: PRIMARY_PASSAGE, transcript: asr, durationSeconds: 20 });
-    const after = scoreReading({ expectedText: PRIMARY_PASSAGE, transcript: PARA_READING, durationSeconds: 20 });
-    expect(before.accuracyPercent).toBe((17 * 100) / 19);
-    expect(after.accuracyPercent).toBe((18 * 100) / 19);
+    const before = scoreReading({ expectedText: PRIMARY_PASSAGE, transcript: asr, durationSeconds: 60 });
+    const after = scoreReading({ expectedText: PRIMARY_PASSAGE, transcript: PARA_READING, durationSeconds: 60 });
+    expect(before.accuracyPercent).toBe(((PASSAGE_TOKENS - 2) * 100) / PASSAGE_TOKENS);
+    expect(after.accuracyPercent).toBe(((PASSAGE_TOKENS - 1) * 100) / PASSAGE_TOKENS);
   });
 
   it("keeps values unrounded and exact at whole-number boundaries", () => {

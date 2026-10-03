@@ -4,7 +4,7 @@ One story: fictional Ana, Grade 2. Show Filipino as the main example while brief
 
 ## Setup
 
-- Seeded teacher, Ana, four passages, twelve reviewed questions, linked illustrative follow-up.
+- Seeded learners Ana (Grade 2), Luis (Grade 4), and Elena (Grade 6). Twelve passages, thirty-six reviewed questions, and Ana's linked illustrative follow-up. Luis and Elena start with no completed check.
 - Phone-width browser on localhost or HTTPS; verify microphone access before judging. If the mic is unavailable, use **Mark words offline** and say so.
 - Know whether live speech, Demo Mode, or Offline tap is active; never hide the label.
 - Keep labeled progress view open in a backup tab. Preserve the follow-up row.
@@ -33,7 +33,7 @@ Point to Passage Reading Accuracy, Reading Rate, word differences, and Comprehen
 
 “Most words matched the passage, while only one of three comprehension answers was correct. That suggests comprehension practice under our demo rules. The teacher still interprets the evidence.”
 
-Rate is a number, not a good/bad fluency label. For the prepared primary fixture only: 18/19 matches ≈94.74%; 19 words in 20 seconds =57 WPM.
+Rate is a number, not a good/bad fluency label. For the prepared primary fixture only: 59/60 matches ≈98.33%; 60 words in 60 seconds = 60 WPM. The seeded follow-up reads the same passage in 50 seconds, which is 72 WPM.
 
 ### 2:40–3:20 — Intervene
 

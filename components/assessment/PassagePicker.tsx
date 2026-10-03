@@ -62,6 +62,9 @@ export function PassagePicker({
 
       <fieldset disabled={locked}>
         <legend className="mb-2 text-sm font-semibold">Passage</legend>
+        <p className="mb-2 text-sm text-neutral-700">
+          Original texts in the Phil-IRI form for this grade. These are not the national test.
+        </p>
         {options.length === 0 ? (
           <p className="rounded-lg border border-neutral-300 p-3 text-sm text-neutral-700">
             No active passages in this language.
@@ -85,7 +88,7 @@ export function PassagePicker({
                   <span className="min-w-0">
                     <span className="block font-semibold">{passage.title}</span>
                     <span className="block text-sm text-neutral-700">
-                      Grade {passage.gradeLevel} · {passage.difficulty} (provisional) ·{" "}
+                      Grade {passage.gradeLevel} {passage.difficulty} · Phil-IRI form ·{" "}
                       {passage.wordCount} words
                     </span>
                     <span className="mt-1 line-clamp-2 block text-sm text-neutral-600">

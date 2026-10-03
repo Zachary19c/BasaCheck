@@ -15,9 +15,9 @@ const MAYA = "10000000-0000-4000-8000-000000000003";
 const NO_FIXTURE = "10000000-0000-4000-8000-000000000008";
 const INACTIVE = "10000000-0000-4000-8000-000000000009";
 const PRIMARY_TEXT =
-  "Maagang gumising si Ana upang tulungan ang kanyang ina. Pagkatapos kumain, nagpunta siya sa paaralan kasama ang kanyang kaibigan.";
+  "Maagang gumising si Ana upang tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.";
 const MAYA_TEXT =
-  "Maya planted a seed in a small pot. She gave it water every morning. Soon a green leaf appeared.";
+  "Maya planted a seed in a small pot. She put the pot by the window. She gave it water every morning. Soon a green leaf appeared. Maya smiled at her little plant.";
 
 const ASSESSMENT_DEFAULTS: Row = {
   status: "recording",
@@ -316,11 +316,11 @@ describe("POST /api/assessments/[id]/audio", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       status: "review",
-      durationSeconds: 20,
+      durationSeconds: 60,
       demoTranscript: true,
     });
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(row(id)).toMatchObject({ status: "review", duration_seconds: 20, accuracy_percent: null });
+    expect(row(id)).toMatchObject({ status: "review", duration_seconds: 60, accuracy_percent: null });
     expect(row(id).transcript).toContain("para tulungan");
   });
 
@@ -427,27 +427,27 @@ describe("POST /api/assessments/[id]/confirm", () => {
       language: "fil",
       status: "review",
       demo_transcript: true,
-      duration_seconds: 20,
+      duration_seconds: 60,
       transcript: PRIMARY_TEXT.replace("upang", "para"),
     });
   }
 
-  it("scores the confirmed primary fixture as 18/19 and 57 WPM", async () => {
+  it("scores the confirmed primary fixture as 59/60 and 60 WPM", async () => {
     const id = demoReview();
     const verified = PRIMARY_TEXT.replace("upang", "para");
 
     const response = await confirmTranscript(jsonRequest({ verifiedTranscript: ` ${verified} ` }), context(id));
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.accuracyPercent).toBeCloseTo((18 / 19) * 100, 10);
-    expect(body.wpm).toBe(57);
+    expect(body.accuracyPercent).toBeCloseTo((59 / 60) * 100, 10);
+    expect(body.wpm).toBe(60);
     expect(body.wordEvents.filter((event: { type: string }) => event.type !== "match")).toEqual([
       { type: "substitution", expected: "upang", spoken: "para" },
     ]);
     expect(row(id)).toMatchObject({
       status: "review",
       verified_transcript: verified,
-      wpm: 57,
+      wpm: 60,
       comprehension_percent: null,
       support_area: null,
     });
@@ -469,13 +469,13 @@ describe("POST /api/assessments/[id]/confirm", () => {
     const audio = await uploadAudio(new Request("http://localhost/api", { method: "POST" }), context(id));
     expect(audio.status).toBe(200);
     const { transcript, durationSeconds } = await audio.json();
-    expect(durationSeconds).toBe(20);
+    expect(durationSeconds).toBe(32);
 
     const response = await confirmTranscript(jsonRequest({ verifiedTranscript: transcript }), context(id));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.accuracyPercent).toBe(100);
-    expect(body.wpm).toBe(57);
+    expect(body.wpm).toBe(60);
   });
 
   it("scores a live transcript with the recording's own duration", async () => {
@@ -490,7 +490,7 @@ describe("POST /api/assessments/[id]/confirm", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.accuracyPercent).toBe(100);
-    expect(body.wpm).toBeCloseTo((19 * 60) / 9.5, 10);
+    expect(body.wpm).toBeCloseTo((32 * 60) / 9.5, 10);
   });
 
   it("never scores before a transcript exists", async () => {

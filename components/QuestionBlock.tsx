@@ -11,11 +11,19 @@ import type { SupportedLanguage } from "@/lib/types";
 
 const COPY: Record<
   SupportedLanguage,
-  { intro: string; question: string; submit: string; submitting: string; missing: string }
+  {
+    intro: string;
+    question: string;
+    levels: [string, string, string];
+    submit: string;
+    submitting: string;
+    missing: string;
+  }
 > = {
   fil: {
     intro: "Basahin ang bawat tanong sa mag-aaral at piliin ang kanyang sagot.",
     question: "Tanong",
+    levels: ["Literal", "Pagpapakahulugan", "Paglalapat"],
     submit: "Isumite ang mga sagot",
     submitting: "Isinusumite…",
     missing: "Walang tanong para sa kuwentong ito.",
@@ -23,6 +31,7 @@ const COPY: Record<
   en: {
     intro: "Read each question to the learner and choose their answer.",
     question: "Question",
+    levels: ["Locate", "Understand", "Evaluate and reflect"],
     submit: "Submit answers",
     submitting: "Submitting…",
     missing: "There are no questions for this passage.",
@@ -94,6 +103,7 @@ export function QuestionBlock({ assessmentId, language, questions }: QuestionBlo
           <legend className="px-1 font-semibold">
             <span className="block text-xs font-medium text-neutral-600">
               {copy.question} {questionIndex + 1}
+              {copy.levels[questionIndex] ? ` · ${copy.levels[questionIndex]}` : ""}
             </span>
             {question.prompt}
           </legend>

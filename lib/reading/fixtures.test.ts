@@ -30,10 +30,10 @@ function readSeedPassages(): SeedPassage[] {
 const passages = readSeedPassages();
 
 describe("reading fixtures", () => {
-  it("finds the four seeded passages, two per language", () => {
-    expect(passages).toHaveLength(4);
-    expect(passages.filter((p) => p.language === "fil")).toHaveLength(2);
-    expect(passages.filter((p) => p.language === "en")).toHaveLength(2);
+  it("finds the seeded passages, with matching Filipino and English sets", () => {
+    expect(passages).toHaveLength(12);
+    expect(passages.filter((p) => p.language === "fil")).toHaveLength(6);
+    expect(passages.filter((p) => p.language === "en")).toHaveLength(6);
   });
 
   it("has exactly one fixture per seeded passage, keyed by passage ID with matching language", () => {
@@ -51,19 +51,19 @@ describe("reading fixtures", () => {
     expect(Object.values(EN_FIXTURES).every((f) => f.language === "en")).toBe(true);
   });
 
-  it("primary Filipino fixture scores 18/19 and 57 WPM against the seeded passage", () => {
+  it("primary Filipino fixture scores 59/60 and 60 WPM against the seeded passage", () => {
     const passage = passages.find((p) => p.id === FIL_PRIMARY_PASSAGE_ID)!;
     const fixture = READING_FIXTURES[FIL_PRIMARY_PASSAGE_ID];
     expect(passage.title).toBe("Si Ana at ang Ina");
-    expect(normalize(passage.content)).toHaveLength(19);
+    expect(normalize(passage.content)).toHaveLength(60);
 
     const result = scoreReading({
       expectedText: passage.content,
       transcript: fixture.transcript,
       durationSeconds: fixture.durationSeconds,
     });
-    expect(result.accuracyPercent).toBe((18 * 100) / 19);
-    expect(result.wpm).toBe(57);
+    expect(result.accuracyPercent).toBe((59 * 100) / 60);
+    expect(result.wpm).toBe(60);
     expect(result.events.filter((e) => e.type !== "match")).toEqual([
       { type: "substitution", expected: "upang", spoken: "para" },
     ]);

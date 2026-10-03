@@ -8,13 +8,13 @@
 
 BasaCheck helps a teacher identify which observed area of reading may need support—passage reading accuracy, reading rate, or comprehension—and track change after an intervention. The teacher decides; the app does not diagnose or establish the cause of a difficulty.
 
-Primary user: an early-grade teacher using a mobile-friendly browser. Use only fictional learner **Ana, Grade 2** for the hackathon.
+Primary user: a teacher using a mobile-friendly browser. Fictional learners: **Ana, Grade 2**, **Luis, Grade 4**, and **Elena, Grade 6**.
 
 ## Locked scope
 
-- No login. The app opens directly on Ana's dashboard.
-- Filipino (default) and English selection inside the Assessment screen.
-- Four seeded, team-created passages: two per language, with three reviewed multiple-choice questions each.
+- No login. The app opens on a dashboard that lists Ana, Luis, and Elena.
+- Filipino (default) and English selection inside the Assessment screen. Passages are limited to that learner's grade.
+- Twelve original passages: two per language for Grades 2, 4, and 6, with three reviewed multiple-choice questions each. Grade 2 and 4 are narratives. Grade 6 is expository: Filipino social studies and English science, following Phil-IRI.
 - One language and one selected passage per assessment. The teacher controls passage selection; changing language or passage after the check starts requires a new assessment.
 - Browser recording, local faster-whisper integration, and an explicitly labeled fixture fallback.
 - Offline tap: the teacher marks missed words on the passage instead of recording. No microphone and no speech service. The same scoring engine runs after the teacher confirms the marked text. Results stay labeled **Offline tap**, not Demo Mode. Saving the check still needs the app server.
@@ -27,7 +27,7 @@ Primary user: an early-grade teacher using a mobile-friendly browser. Use only f
 
 | Screen | Job |
 | --- | --- |
-| Dashboard | Ana, latest result, start assessment, progress link |
+| Dashboard | Ana, Luis, and Elena, each with the latest result, start assessment, and progress link |
 | Assessment | Language + passage selection, record/stop or offline tap, teacher transcript review, three questions |
 | Results | Measurements, word differences, demo suggestion, teacher intervention choice |
 | Progress | First check and follow-up with provenance labels |
@@ -76,15 +76,15 @@ Repeated reading remains available for teacher selection without an automatic ra
 
 ## Content and demo data
 
-Seed four approved-for-demo original passage/question sets. Grade/difficulty labels are provisional content labels, not validated national standards. No passage-management UI.
+Seed four original Grade 2 narratives written to the published Phil-IRI design: Grades 2–4 are narratives, Filipino oral passages are about 65 words, and English Grade 2 oral passages are about 30–40 words. These stories are not copies of the Phil-IRI test. Each passage has three questions in Phil-IRI order, which also matches the three PISA reading processes at Grade 2: literal/locate, interpretive/understand, and applied/evaluate and reflect. PISA passages themselves are for 15-year-olds and are not used. No passage-management UI. The app does not assign an official reading level.
 
-Primary Filipino demo passage, **Si Ana at ang Ina**:
+Primary Filipino demo passage, **Si Ana at ang Ina** (60 words):
 
-> Maagang gumising si Ana upang tulungan ang kanyang ina. Pagkatapos kumain, nagpunta siya sa paaralan kasama ang kanyang kaibigan.
+> Maagang gumising si Ana upang tulungan ang kanyang ina. Nagluto sila ng kanin at itlog. Pagkatapos kumain, naghugas si Ana ng mga plato. Ipinahid din niya ang mesa. Bago umalis, niyakap niya ang ina. Tapos, nagpunta siya sa paaralan kasama ang kanyang kaibigan. Masaya si Ana dahil nakatulong siya sa bahay. At ngumiti pa si Ana nang maluwag sa ina.
 
-Questions: whom did Ana help (her mother), where did she go after eating (school), and who accompanied her (her friend). Supply three choices and one reviewed correct answer per question.
+Questions: whom Ana helped (her mother; literal), what washing the plates shows (she is helping her mother; interpretive), and what a learner should do after eating (help at home; applied). Supply three choices and one reviewed correct answer per question.
 
-The passage contains **19 whitespace-separated tokens**, not 17. Use the agreed normalizer to derive counts. A fixture replacing only `upang` with `para` gives 18/19 matches (about 94.74%). At a fixture duration of 20 seconds, 19 verified spoken tokens produce 57 WPM. Seed initial comprehension 1/3 and follow-up 3/3; derive follow-up reading metrics from its transcript and duration rather than hardcoding mismatched counts.
+The passage contains **60 whitespace-separated tokens**. Use the agreed normalizer to derive counts. A fixture replacing only `upang` with `para` gives 59/60 matches (about 98.33%). At a fixture duration of 60 seconds, 60 verified spoken tokens produce 60 WPM. The seeded follow-up is the same passage read as written in 50 seconds, which is 72 WPM. Seed initial comprehension 1/3 and follow-up 3/3; derive follow-up reading metrics from its transcript and duration rather than hardcoding mismatched counts.
 
 Other content: one additional Filipino passage and two English passages, each with three reviewed questions. Fixtures must be keyed by **passage ID**, not just language, so every selectable passage has matching text and duration.
 

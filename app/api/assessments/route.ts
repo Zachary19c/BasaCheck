@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   const { data: learner, error: learnerError } = await supabase
     .from("learners")
-    .select("id")
+    .select("id, grade_level")
     .eq("id", learnerId)
     .maybeSingle();
   if (learnerError) return apiError(500, "database_error", "Could not load the learner.");
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
   const { data: passage, error: passageError } = await supabase
     .from("passages")
-    .select("id, language")
+    .select("id, language, grade_level")
     .eq("id", passageId)
     .eq("is_active", true)
     .maybeSingle();
@@ -49,6 +49,13 @@ export async function POST(request: Request) {
   if (!passage) return apiError(404, "passage_not_found", "Passage not found or not active.");
 
   const passageLanguage = passage.language as SupportedLanguage;
+  if (
+    typeof learner.grade_level === "number" &&
+    typeof passage.grade_level === "number" &&
+    learner.grade_level !== passage.grade_level
+  ) {
+    return apiError(400, "grade_mismatch", "Choose a passage for this learner's grade.");
+  }
   if (language !== passageLanguage) {
     return apiError(400, "language_mismatch", "The selected language does not match this passage.");
   }

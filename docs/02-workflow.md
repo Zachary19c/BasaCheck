@@ -1,10 +1,10 @@
 # BasaCheck — Final MVP Workflow
 
-Four screens, one fictional learner, one selected passage per assessment. No login: the app opens directly on the dashboard. `01-mvp-prd.md` defines the locked scope.
+Four screens, three fictional learners, one selected passage per assessment. No login: the app opens directly on the dashboard. `01-mvp-prd.md` defines the locked scope.
 
 ## Teacher path
 
-1. **Dashboard:** the app opens here. Show Ana, Grade 2, latest completed check, Start assessment, and View progress. Mark seeded, demo, or offline-tap data.
+1. **Dashboard:** the app opens here. Show Ana (Grade 2), Luis (Grade 4), and Elena (Grade 6). Each card has the latest completed check, Start assessment, and View progress. Mark seeded, demo, or offline-tap data. A new learner may have no completed check yet.
 2. **Assessment setup:** choose Filipino (default) or English, then one of the two active passages in that language. Show grade, provisional difficulty, word count, and preview. Teacher selects the material; lock language/passage when the check starts.
 3. **Capture, one of two ways:**
    - **Record:** request microphone permission on Start; display timer and Stop. Upload audio and selected language through the server-side Next.js route. Show learner instructions in the passage language. Use HTTPS or localhost for microphone access; an ordinary HTTP phone-on-Wi-Fi connection may block the mic.
