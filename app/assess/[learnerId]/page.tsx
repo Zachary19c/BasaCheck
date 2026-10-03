@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AssessmentFlow } from "@/components/assessment/AssessmentFlow";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 import type { PassageOption } from "@/components/assessment/PassagePicker";
 import { isUuid } from "@/lib/assessment/api";
 import { isDemoMode } from "@/lib/demo-mode";
@@ -72,13 +73,14 @@ export default async function AssessPage({
   );
 
   return (
-    <main className="mx-auto max-w-md space-y-6 px-4 py-6">
-      <header className="space-y-1">
-        <Link href="/dashboard" className="text-sm font-medium text-blue-800 underline">
+    <main className="mx-auto w-full max-w-md space-y-7 px-6 pt-6 pb-16">
+      <header className="space-y-3">
+        <Link href="/dashboard" className="link-quiet">
+          <ArrowLeftIcon size={16} />
           Back to dashboard
         </Link>
-        <h1 className="text-2xl font-bold">Reading check</h1>
-        <p className="text-neutral-700">
+        <h1 className="text-[2.125rem] font-bold leading-tight">Reading check</h1>
+        <p className="meta text-sm">
           {learner.display_name} · Grade {learner.grade_level}
         </p>
       </header>

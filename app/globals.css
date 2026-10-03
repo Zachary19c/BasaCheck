@@ -1,1 +1,537 @@
 @import "tailwindcss";
+
+/* BasaCheck: plain paper inside a tan frame, ink type, and bAI's teal and
+   book-yellow for measured values and highlights. */
+@theme {
+  --color-paper: #e8e8e4;
+  --color-sheet: #f8f8f5;
+  --color-frame: #b9ae9b;
+  --color-ink: #161616;
+  --color-ink-2: #3b3b39;
+  --color-muted: #5c5c58;
+  --color-line: #d2d2cc;
+  --color-line-strong: #a19f98;
+  --color-tick: #d0d0ca;
+  --color-teal: #1d7c84;
+  --color-teal-deep: #0e4a52;
+  --color-teal-wash: #dcebec;
+  --color-sun: #f2b33d;
+  --color-sun-deep: #c98a12;
+  --color-sun-wash: #fcefd2;
+  --color-heron: #8aa3b5;
+  --color-danger: #b4231b;
+  --color-danger-wash: #fbeae8;
+  --color-danger-line: #e7a29c;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-fredoka), var(--font-geist-sans), ui-sans-serif, sans-serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  ::selection {
+    background: var(--color-sun);
+    color: var(--color-ink);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-teal);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  /* The tan frame around the whole viewport, drawn above everything. */
+  /* The paper-colored spread hides content that scrolls past the frame line. */
+  .viewport-frame {
+    position: fixed;
+    inset: 6px;
+    z-index: 60;
+    pointer-events: none;
+    border: 5px solid var(--color-frame);
+    border-radius: 18px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      inset 0 0 0 1px rgb(0 0 0 / 0.05),
+      0 0 0 1px rgb(0 0 0 / 0.04),
+      0 0 0 48px var(--color-paper);
+  }
+
+  @media (min-width: 768px) {
+    .viewport-frame {
+      inset: 10px;
+      border-width: 7px;
+      border-radius: 22px;
+    }
+  }
+
+  .splash-surface {
+    background-color: var(--color-paper);
+  }
+
+  .title-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  /* Small supporting text. Sans for readability; numbers stay tabular. */
+  .meta {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A soft sheet on the graph paper, like the speech bubble in the reference. */
+  .panel {
+    border: 1px solid rgb(22 22 22 / 0.09);
+    border-radius: 14px;
+    background: var(--color-sheet);
+    box-shadow:
+      0 1px 2px rgb(22 22 22 / 0.05),
+      0 8px 24px -14px rgb(22 22 22 / 0.28);
+  }
+
+  .bubble {
+    position: relative;
+    border: 1px solid rgb(22 22 22 / 0.1);
+    border-radius: 14px;
+    background: var(--color-sheet);
+    box-shadow:
+      0 1px 2px rgb(22 22 22 / 0.06),
+      0 10px 28px -14px rgb(22 22 22 / 0.32);
+  }
+
+  /* Tail under the bubble, pointing at the speaker below it. */
+  .bubble-tail-down::after {
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 13px;
+    height: 13px;
+    border-right: 1px solid rgb(22 22 22 / 0.1);
+    border-bottom: 1px solid rgb(22 22 22 / 0.1);
+    background: var(--color-sheet);
+    content: "";
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* Tail on the left, pointing at an avatar beside the bubble. */
+  .bubble-tail-left::after {
+    position: absolute;
+    top: 18px;
+    left: -7px;
+    width: 13px;
+    height: 13px;
+    border-bottom: 1px solid rgb(22 22 22 / 0.1);
+    border-left: 1px solid rgb(22 22 22 / 0.1);
+    background: var(--color-sheet);
+    content: "";
+    transform: rotate(45deg);
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    padding: 0 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: center;
+    transition:
+      background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--color-teal-deep);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.14),
+      0 1px 2px rgb(14 74 82 / 0.35);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #0a3a41;
+  }
+
+  .btn-primary:disabled {
+    background: var(--color-line-strong);
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    border: 1px solid rgb(22 22 22 / 0.16);
+    background: var(--color-sheet);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgb(22 22 22 / 0.06);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: rgb(22 22 22 / 0.32);
+    background: #fff;
+  }
+
+  .btn-secondary:disabled {
+    color: var(--color-muted);
+    box-shadow: none;
+  }
+
+  .btn-danger {
+    background: var(--color-danger);
+    color: #fff;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: #951a14;
+  }
+
+  .link-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+
+  .link-quiet:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    padding: 0.1875rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: rgb(22 22 22 / 0.07);
+    color: var(--color-ink-2);
+  }
+
+  .tag-sun {
+    background: var(--color-sun);
+    color: var(--color-ink);
+  }
+
+  .tag-teal {
+    background: var(--color-teal-deep);
+    color: #fff;
+  }
+
+  .tag-dashed {
+    border: 1px dashed var(--color-ink-2);
+    background: transparent;
+  }
+
+  /* Provenance and Demo notices: dashed, because the data is not a live reading. */
+  .note-dashed {
+    border: 1px dashed rgb(22 22 22 / 0.45);
+    border-radius: 12px;
+    background: rgb(248 248 245 / 0.8);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .alert {
+    border: 1px solid var(--color-danger-line);
+    border-radius: 12px;
+    background: var(--color-danger-wash);
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+    color: #5c110c;
+  }
+
+  .field {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 10px;
+    background: #fff;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: var(--color-ink);
+  }
+
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+
+  .field:disabled {
+    background: var(--color-paper);
+  }
+
+  /* Radio card. The selected card gets a teal frame. */
+  .choice {
+    display: block;
+    cursor: pointer;
+    border: 1px solid rgb(22 22 22 / 0.14);
+    border-radius: 12px;
+    background: var(--color-sheet);
+    transition:
+      border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .choice:hover {
+    border-color: rgb(22 22 22 / 0.3);
+  }
+
+  .choice:has(:checked) {
+    border-color: var(--color-teal);
+    box-shadow: inset 0 0 0 1px var(--color-teal);
+    background: #fff;
+  }
+
+  .choice:has(:focus-visible) {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+
+  .choice:has(:disabled) {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .radio-mark {
+    appearance: none;
+    display: inline-grid;
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    place-content: center;
+    border: 1.5px solid var(--color-ink-2);
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  .radio-mark::before {
+    width: 0.5625rem;
+    height: 0.5625rem;
+    border-radius: 999px;
+    background: var(--color-teal);
+    content: "";
+    transform: scale(0);
+    transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .radio-mark:checked {
+    border-color: var(--color-teal);
+  }
+
+  .radio-mark:checked::before {
+    transform: scale(1);
+  }
+
+  .radio-mark:focus-visible {
+    outline: none;
+  }
+
+  .mascot {
+    border-radius: 22%;
+    box-shadow:
+      0 2px 4px rgb(14 74 82 / 0.2),
+      0 14px 30px -12px rgb(14 74 82 / 0.5);
+  }
+}
+
+/* Gauge ticks light up in order once, from an already visible empty ring. */
+@keyframes tick-on {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tick-lit {
+  animation: tick-on 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.rec-dot {
+  animation: rec-pulse 1.2s ease-in-out infinite;
+}
+
+/* bAI splash: the bubble pops, the heron settles in and keeps reading. */
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes heron-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) rotate(-4deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes heron-read {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  30% {
+    transform: translateY(-5px) rotate(-1.5deg);
+  }
+  60% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+}
+
+@keyframes shadow-read {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scaleX(0.86);
+    opacity: 0.34;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dot-wave {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(1.03);
+  }
+}
+
+.splash-bubble {
+  animation: bubble-in 560ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+.splash-heron {
+  animation: heron-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.splash-heron-idle {
+  animation: heron-read 3.2s ease-in-out 700ms infinite;
+  transform-origin: 50% 90%;
+}
+
+.splash-shadow {
+  animation: shadow-read 3.2s ease-in-out 700ms infinite;
+}
+
+.splash-hint {
+  animation: fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) 1100ms both;
+}
+
+.splash-dot {
+  display: inline-block;
+  animation: dot-wave 1.2s ease-in-out infinite;
+}
+
+.splash-leave {
+  animation: splash-out 420ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tick-lit,
+  .rec-dot,
+  .splash-bubble,
+  .splash-heron,
+  .splash-heron-idle,
+  .splash-shadow,
+  .splash-hint,
+  .splash-dot {
+    animation: none;
+  }
+
+  .splash-leave {
+    animation-duration: 1ms;
+  }
+}

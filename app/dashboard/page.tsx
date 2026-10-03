@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TickGauge } from "@/components/ui/TickGauge";
 import {
   mapAssessmentFromDatabase,
   type AssessmentDatabaseRow,
@@ -16,10 +17,6 @@ type LearnerRecord = {
 type LatestAssessmentRecord = AssessmentDatabaseRow & {
   passages: { title: string } | { title: string }[] | null;
 };
-
-function displayScore(value: number | null, unit: "%" | " WPM") {
-  return value === null ? "—" : `${Math.round(value)}${unit}`;
-}
 
 function passageTitle(record: LatestAssessmentRecord | undefined) {
   if (!record) return null;
@@ -52,88 +49,85 @@ export default async function DashboardPage() {
   const completed = (assessmentsResult.data ?? []) as LatestAssessmentRecord[];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6">
-      <section>
-        <p className="text-sm font-medium text-teal-700">Learner dashboard</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">Choose a learner</h1>
-        <p className="mt-1 text-neutral-600">
-          Each learner reads passages for their own grade.
-        </p>
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-6 pt-6 pb-16 sm:max-w-6xl sm:px-10 md:gap-7 md:pt-10">
+      <section className="pb-1">
+        <h1 className="text-[2.125rem] font-bold leading-tight md:text-[2.75rem]">Choose a learner</h1>
+        <p className="mt-2 text-ink-2">Each learner reads passages for their own grade.</p>
       </section>
-      {learners.map((learner) => {
-        const latestRecord = completed.find((row) => row.learner_id === learner.id);
-        const latest = latestRecord ? mapAssessmentFromDatabase(latestRecord) : null;
-        const provenanceLabel = latest?.seededDemo
-          ? "Seeded demo"
-          : latest?.inputMode === "tap"
-            ? "Offline tap"
-            : latest?.demoTranscript
-              ? "Demo Mode"
-              : null;
+      {/* One column on phones; side by side on wider screens. */}
+      <div className="grid gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+        {learners.map((learner) => {
+          const latestRecord = completed.find((row) => row.learner_id === learner.id);
+          const latest = latestRecord ? mapAssessmentFromDatabase(latestRecord) : null;
+          const provenanceLabel = latest?.seededDemo
+            ? "Seeded demo"
+            : latest?.inputMode === "tap"
+              ? "Offline tap"
+              : latest?.demoTranscript
+                ? "Demo Mode"
+                : null;
 
-        return (
-          <section
-            key={learner.id}
-            className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">{learner.display_name}</h2>
-                <p className="text-neutral-600">Grade {learner.grade_level}</p>
+          return (
+            <section key={learner.id} className="panel flex flex-col p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-tight">{learner.display_name}</h2>
+                  <p className="meta mt-0.5">Grade {learner.grade_level}</p>
+                </div>
+                {provenanceLabel ? (
+                  <span className="tag tag-dashed shrink-0">{provenanceLabel}</span>
+                ) : null}
               </div>
-              {provenanceLabel ? (
-                <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                  {provenanceLabel}
-                </span>
-              ) : null}
-            </div>
-            {latest ? (
-              <>
-                <p className="mt-3 text-sm text-neutral-600">
-                  {passageTitle(latestRecord)} ·{" "}
-                  {new Intl.DateTimeFormat("en-PH", { dateStyle: "medium" }).format(
-                    new Date(latest.createdAt),
-                  )}
-                </p>
-                <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <dt className="text-xs text-neutral-500">Accuracy</dt>
-                    <dd className="mt-1 font-bold">
-                      {displayScore(latest.accuracyPercent, "%")}
-                    </dd>
+              {latest ? (
+                <>
+                  <div className="mt-4">
+                    <p className="text-xs text-muted">
+                      Latest check ·{" "}
+                      {new Intl.DateTimeFormat("en-PH", { dateStyle: "medium" }).format(
+                        new Date(latest.createdAt),
+                      )}
+                    </p>
+                    <p className="mt-0.5 font-medium text-ink">{passageTitle(latestRecord)}</p>
                   </div>
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <dt className="text-xs text-neutral-500">Rate</dt>
-                    <dd className="mt-1 font-bold">{displayScore(latest.wpm, " WPM")}</dd>
-                  </div>
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <dt className="text-xs text-neutral-500">Comprehension</dt>
-                    <dd className="mt-1 font-bold">
-                      {displayScore(latest.comprehensionPercent, "%")}
-                    </dd>
-                  </div>
-                </dl>
-              </>
-            ) : (
-              <p className="mt-3 text-sm text-neutral-600">No completed checks yet.</p>
-            )}
-            <div className="mt-4 grid gap-2">
-              <Link
-                className="rounded-xl bg-teal-700 px-4 py-3 text-center font-semibold text-white hover:bg-teal-800"
-                href={`/assess/${learner.id}`}
-              >
-                Start assessment
-              </Link>
-              <Link
-                className="rounded-xl border border-neutral-300 bg-white px-4 py-3 text-center font-semibold hover:bg-neutral-100"
-                href={`/progress/${learner.id}`}
-              >
-                View progress
-              </Link>
-            </div>
-          </section>
-        );
-      })}
+                  <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+                    <div className="flex flex-col-reverse items-center gap-1.5">
+                      <dt className="text-xs text-ink-2">Accuracy</dt>
+                      <dd>
+                        <TickGauge value={latest.accuracyPercent} size={78} ticks={40} />
+                      </dd>
+                    </div>
+                    <div className="flex flex-col-reverse items-center gap-1.5">
+                      <dt className="text-xs text-ink-2">Comprehension</dt>
+                      <dd>
+                        <TickGauge value={latest.comprehensionPercent} size={78} ticks={40} />
+                      </dd>
+                    </div>
+                    <div className="flex flex-col-reverse items-center gap-1.5">
+                      <dt className="text-xs text-ink-2">Reading rate</dt>
+                      <dd className="flex h-[78px] flex-col items-center justify-center">
+                        <span className="font-mono text-xl font-semibold tabular-nums">
+                          {latest.wpm === null ? "—" : Math.round(latest.wpm)}
+                        </span>
+                        <span className="meta text-[0.6875rem]">words/min</span>
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              ) : (
+                <p className="mt-4 text-sm text-ink-2">No completed checks yet.</p>
+              )}
+              <div className="mt-auto grid gap-2 pt-5">
+                <Link className="btn btn-primary" href={`/assess/${learner.id}`}>
+                  Start assessment
+                </Link>
+                <Link className="btn btn-secondary" href={`/progress/${learner.id}`}>
+                  View progress
+                </Link>
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </main>
   );
 }

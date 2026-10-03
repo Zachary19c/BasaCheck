@@ -71,14 +71,11 @@ export function InterventionPicker({
   return (
     <form onSubmit={save} className="space-y-3">
       <fieldset disabled={saving} className="space-y-3">
-        <legend className="mb-1 text-sm font-semibold">Choose an activity</legend>
+        <legend className="mb-1 text-sm font-medium text-ink-2">Choose an activity</legend>
         {INTERVENTION_IDS.map((id) => {
           const card = INTERVENTIONS[id];
           return (
-            <label
-              key={id}
-              className="block cursor-pointer rounded-xl border border-neutral-300 p-4 has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-700"
-            >
+            <label key={id} className="choice p-4">
               <span className="flex items-start gap-3">
                 <input
                   type="radio"
@@ -86,25 +83,17 @@ export function InterventionPicker({
                   value={id}
                   checked={selected === id}
                   onChange={() => setSelected(id)}
-                  className="mt-1 size-4 accent-blue-700"
+                  className="radio-mark mt-0.5"
                 />
                 <span className="min-w-0 space-y-2">
                   <span className="flex flex-wrap items-center gap-2">
                     <span lang="en" className="font-semibold">
                       {card.title.en}
                     </span>
-                    {suggested === id && (
-                      <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
-                        Suggested activity
-                      </span>
-                    )}
-                    {chosen === id && (
-                      <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-900">
-                        Chosen activity
-                      </span>
-                    )}
+                    {suggested === id && <span className="tag tag-sun">Suggested activity</span>}
+                    {chosen === id && <span className="tag tag-teal">Chosen activity</span>}
                   </span>
-                  <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-neutral-700">
+                  <ol lang="en" className="list-decimal space-y-1 pl-5 text-sm text-ink-2 marker:font-mono marker:text-muted">
                     {card.steps.en.map((step) => (
                       <li key={step}>{step}</li>
                     ))}
@@ -117,17 +106,17 @@ export function InterventionPicker({
       </fieldset>
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-950">
+        <p role="alert" className="alert">
           {error}
         </p>
       )}
-      <p role="status" aria-live="polite" className="text-sm text-neutral-700">
+      <p role="status" aria-live="polite" className="text-sm text-ink-2">
         {chosen ? `Chosen activity: ${INTERVENTIONS[chosen].title.en}` : "No activity saved yet."}
       </p>
       <button
         type="submit"
         disabled={!selected || saving || selected === chosen}
-        className="min-h-12 w-full rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:bg-neutral-400"
+        className="btn btn-primary w-full"
       >
         {saving ? "Saving…" : "Save chosen activity"}
       </button>
