@@ -310,6 +310,23 @@ export function AssessmentFlow({
                 {!startingDemo && !practicing && (
                   <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
                 )}
+                {phase.name === "setup" && !practicing && (
+                  <button
+                    type="button"
+                    onClick={() => setPracticing(true)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-teal/30 bg-teal-wash/70 p-3 text-left transition-colors hover:bg-teal-wash"
+                  >
+                    <SparkIcon size={18} className="shrink-0 text-teal" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2 font-semibold text-teal-deep">
+                        Live practice <span className="tag tag-sun">Beta</span>
+                      </span>
+                      <span className="block text-sm text-ink-2">
+                        Words turn green as the learner reads them correctly.
+                      </span>
+                    </span>
+                  </button>
+                )}
               </div>
               {practicing && phase.name === "setup" ? (
                 <LivePractice
@@ -324,24 +341,14 @@ export function AssessmentFlow({
                 </p>
               )}
               {phase.name === "setup" && !practicing && (
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={startTapMode}
-                    className="btn btn-secondary w-full"
-                  >
-                    <HandIcon size={18} />
-                    Mark words offline
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPracticing(true)}
-                    className="btn btn-secondary w-full"
-                  >
-                    <SparkIcon size={16} className="text-teal" />
-                    Live practice
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={startTapMode}
+                  className="btn btn-secondary w-full"
+                >
+                  <HandIcon size={18} />
+                  Mark words offline
+                </button>
               )}
               {demoMode && canUseFixture && phase.name === "setup" && !practicing && (
                 <details className="note-dashed">
@@ -362,7 +369,9 @@ export function AssessmentFlow({
               )}
             </section>
           ) : (
-            <p className="note-dashed text-ink-2">Choose a passage to start recording.</p>
+            <p className="note-dashed text-ink-2">
+            Choose a passage to start recording, mark words offline, or try live practice.
+          </p>
           ))}
       </div>
 
