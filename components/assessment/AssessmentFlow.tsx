@@ -14,10 +14,11 @@ import type {
 import type { PassageQuestion } from "@/lib/questions";
 import type { SupportedLanguage } from "@/lib/types";
 import { QuestionBlock } from "@/components/QuestionBlock";
-import { HandIcon } from "@/components/ui/icons";
+import { HandIcon, SparkIcon } from "@/components/ui/icons";
 import { type PassageOption, PassagePicker } from "./PassagePicker";
 import { Recorder } from "./Recorder";
 import { TapPassage } from "./TapPassage";
+import { LivePractice } from "./LivePractice";
 import { TranscriptReview } from "./TranscriptReview";
 
 type ActiveAssessment = {
@@ -76,6 +77,8 @@ export function AssessmentFlow({
   const [savingTap, setSavingTap] = useState(false);
   const [active, setActive] = useState<ActiveAssessment | null>(null);
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  // Live practice replaces the reading card controls until the teacher closes it.
+  const [practicing, setPracticing] = useState(false);
   const creatingRef = useRef(false);
   // Recorder callbacks finish after later renders, so they read the current assessment here.
   const activeRef = useRef<ActiveAssessment | null>(null);
@@ -304,24 +307,43 @@ export function AssessmentFlow({
                     {INSTRUCTIONS[selected.language]}
                   </p>
                 </div>
-                {!startingDemo && (
+                {!startingDemo && !practicing && (
                   <Recorder onStart={startRecording} onRecorded={submitAudio} onError={fail} />
                 )}
               </div>
-              <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
-                {selected.content}
-              </p>
-              {phase.name === "setup" && (
-                <button
-                  type="button"
-                  onClick={startTapMode}
-                  className="btn btn-secondary w-full"
-                >
-                  <HandIcon size={18} />
-                  Mark words offline
-                </button>
+              {practicing && phase.name === "setup" ? (
+                <LivePractice
+                  key={selected.id}
+                  content={selected.content}
+                  language={selected.language}
+                  onClose={() => setPracticing(false)}
+                />
+              ) : (
+                <p lang={selected.language} className="text-[1.375rem] leading-relaxed text-ink">
+                  {selected.content}
+                </p>
               )}
-              {demoMode && canUseFixture && phase.name === "setup" && (
+              {phase.name === "setup" && !practicing && (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={startTapMode}
+                    className="btn btn-secondary w-full"
+                  >
+                    <HandIcon size={18} />
+                    Mark words offline
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPracticing(true)}
+                    className="btn btn-secondary w-full"
+                  >
+                    <SparkIcon size={16} className="text-teal" />
+                    Live practice
+                  </button>
+                </div>
+              )}
+              {demoMode && canUseFixture && phase.name === "setup" && !practicing && (
                 <details className="note-dashed">
                   <summary className="cursor-pointer font-semibold text-ink">Demo Mode: use a sample transcript</summary>
                   <p className="mt-2 text-sm">
