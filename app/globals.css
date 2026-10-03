@@ -38,6 +38,7 @@
   html {
     background-color: var(--color-paper);
     color: var(--color-ink);
+    scroll-behavior: smooth;
     scrollbar-color: var(--color-line-strong) transparent;
   }
 
@@ -524,6 +525,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .tick-lit,
   .rec-dot,
   .splash-bubble,

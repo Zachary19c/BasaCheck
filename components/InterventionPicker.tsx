@@ -3,8 +3,9 @@
 import { type FormEvent, useState } from "react";
 import Link from "next/link";
 import type { ApiErrorBody } from "@/lib/assessment/contract";
+import { ActivityMaterial } from "@/components/ActivityMaterial";
 import { INTERVENTION_IDS, INTERVENTIONS } from "@/lib/interventions";
-import type { InterventionId, SupportedLanguage } from "@/lib/types";
+import type { InterventionId, SupportedLanguage, WordEvent } from "@/lib/types";
 
 // Owner: Member 4. Three static activity cards. The teacher can save any card;
 // the suggestion is marked only when the demo rule produced one.
@@ -13,8 +14,12 @@ import type { InterventionId, SupportedLanguage } from "@/lib/types";
 
 type InterventionPickerProps = {
   assessmentId: string;
-  // Passage language. Kept for callers; the cards no longer use it.
+  // Passage language, for the learner material in the practice guide.
   language: SupportedLanguage;
+  // The checked passage and its word differences, used to build the material
+  // shown to the learner at each step. Without them the guide shows steps only.
+  passage?: string;
+  differences?: WordEvent[];
   suggested: InterventionId | null;
   chosen: InterventionId | null;
   learnerId: string;
@@ -37,6 +42,9 @@ const PRACTICE_GOALS: Record<InterventionId, { focus: string; lookFor: string }>
 
 export function InterventionPicker({
   assessmentId,
+  language,
+  passage,
+  differences = [],
   suggested,
   chosen: initialChosen,
   learnerId,
@@ -162,6 +170,15 @@ export function InterventionPicker({
               {card.steps.en[stepIndex]}
             </p>
             <p className="text-sm text-ink-2">Do this with the learner, then continue.</p>
+            {passage && (
+              <ActivityMaterial
+                activity={chosen}
+                step={stepIndex}
+                passage={passage}
+                language={language}
+                differences={differences}
+              />
+            )}
             <div className="flex flex-col gap-2 sm:flex-row">
               {stepIndex > 0 && (
                 <button
