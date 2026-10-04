@@ -154,6 +154,10 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
             </h2>
             {differences.length > 0 && <span className="meta">{differences.length} total</span>}
           </div>
+          <p className="text-sm text-ink-2">
+            Compared with the transcript confirmed during this check. These text differences do
+            not independently verify what the learner said.
+          </p>
           {differences.length === 0 ? (
             <p className="text-sm text-ink-2">No word differences recorded.</p>
           ) : (
@@ -192,6 +196,22 @@ export default async function ResultsPage({ params }: PageProps<"/results/[asses
                 ))}
               </ul>
             </>
+          )}
+          {assessment.inputMode === "speech" && !assessment.demoTranscript && !assessment.seededDemo && (
+            <details className="note-dashed text-sm">
+              <summary className="cursor-pointer font-semibold">Review the transcript used for scoring</summary>
+              <p className="mt-3 font-semibold">Speech-recognition draft</p>
+              <p lang={assessment.language} className="mt-1 whitespace-pre-wrap">{assessment.transcript}</p>
+              <p className="mt-3 font-semibold">Teacher-confirmed transcript</p>
+              <p lang={assessment.language} className="mt-1 whitespace-pre-wrap">{assessment.verifiedTranscript}</p>
+              <p className="mt-3 text-ink-2">
+                If the recording was too unclear to verify, repeat the check before using these measurements.
+              </p>
+              <Link href={`/assess/${assessment.learnerId}`} className="link-quiet mt-2 inline-flex">
+                Start another reading check
+                <ArrowRightIcon size={16} />
+              </Link>
+            </details>
           )}
         </section>
       </div>
