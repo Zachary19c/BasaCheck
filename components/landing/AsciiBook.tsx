@@ -11,7 +11,7 @@ export function AsciiBook({ className }: { className?: string }) {
       className={className}
       charset={" .,:;-=+*#/\\|_()"}
       colored={false}
-      color="#161616"
+      color="#1f6a72"
       background=""
       cellSize={10}
       cellAspect={0.6}
