@@ -46,7 +46,7 @@ function MeasureRow({ label, value }: { label: string; value: number | null }) {
       <span className="text-ink-2">{label}</span>
       <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{percent(value)}</span>
       <span className="col-span-2">
-        <TickBar value={value} ticks={32} />
+        <TickBar value={value} />
       </span>
     </li>
   );
