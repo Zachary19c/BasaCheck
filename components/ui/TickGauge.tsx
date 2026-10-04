@@ -87,16 +87,17 @@ export function TickGauge({
   );
 }
 
-// The same tick language laid out in a row, for compact comparisons.
-export function TickBar({ value, ticks = 24 }: { value: number | null; ticks?: number }) {
+// The same tick language laid out in a row, for compact comparisons. It
+// fills its row; each segment is an equal share (5% with the default 20).
+export function TickBar({ value, ticks = 20 }: { value: number | null; ticks?: number }) {
   const clamped = value === null ? 0 : Math.max(0, Math.min(100, value));
   const lit = Math.round((clamped / 100) * ticks);
   return (
-    <span className="flex h-3 items-stretch gap-[2px]" aria-hidden="true">
+    <span className="flex h-3.5 w-full items-stretch gap-[3px]" aria-hidden="true">
       {Array.from({ length: ticks }, (_, index) => (
         <span
           key={index}
-          className={`w-[3px] rounded-full ${index < lit ? "bg-teal" : "bg-tick"}`}
+          className={`flex-1 rounded-[3px] ${index < lit ? "bg-teal-deep" : "bg-ink/10"}`}
         />
       ))}
     </span>

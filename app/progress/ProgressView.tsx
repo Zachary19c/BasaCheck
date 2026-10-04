@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "@/components/ui/icons";
 import { TickBar } from "@/components/ui/TickGauge";
 import {
   buildComparisons,
+  compareAssessments,
   COMPARISON_NOTE,
   type ComparisonResult,
   formatNumber,
@@ -29,17 +30,6 @@ function includesDemo(result: ComparisonResult) {
   );
 }
 
-function realCheckFromMixedPair(result: ComparisonResult): ComparisonResult | null {
-  if (result.kind === "none" || !includesDemo(result)) return null;
-  const baselineIsReal = !result.baseline.seededDemo && !result.baseline.demoTranscript;
-  const followUpIsReal = !result.followUp.seededDemo && !result.followUp.demoTranscript;
-  if (result.kind === "pair" && baselineIsReal) {
-    return { kind: "none", baseline: result.baseline };
-  }
-  if (followUpIsReal) return { kind: "none", baseline: result.followUp };
-  return null;
-}
-
 function dateLabel(value: string) {
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(value),
@@ -56,7 +46,7 @@ function MeasureRow({ label, value }: { label: string; value: number | null }) {
       <span className="text-ink-2">{label}</span>
       <span className="whitespace-nowrap text-sm font-semibold tabular-nums">{percent(value)}</span>
       <span className="col-span-2">
-        <TickBar value={value} ticks={32} />
+        <TickBar value={value} />
       </span>
     </li>
   );
@@ -146,14 +136,135 @@ function ComparisonCard({ result, title }: { result: ComparisonResult; title: st
   );
 }
 
+const LANGUAGES = [
+  { value: "fil", label: "Filipino" },
+  { value: "en", label: "English" },
+] as const;
+
+function isDemo(assessment: AssessmentRow) {
+  return assessment.seededDemo || assessment.demoTranscript;
+}
+
+// One real check as a single clean card.
+function RealCheckCard({ label, assessment, title }: { label: string; assessment: AssessmentRow; title: string }) {
+  const chosen = assessment.interventionId ? INTERVENTIONS[assessment.interventionId] : null;
+  return (
+    <article className="panel h-full space-y-4 p-5">
+      <div>
+        <p className="meta text-xs font-semibold">{label}</p>
+        <h4 className="mt-1 text-lg font-semibold">{title}</h4>
+        <p className="meta text-xs">{dateLabel(assessment.createdAt)}</p>
+      </div>
+      <ProvenanceLabels assessment={assessment} />
+      <ul className="space-y-3 text-sm">
+        <MeasureRow label="Passage Reading Accuracy" value={assessment.accuracyPercent} />
+        <MeasureRow label="Comprehension" value={assessment.comprehensionPercent} />
+        <li className="flex items-baseline justify-between gap-3">
+          <span className="text-ink-2">Reading Rate</span>
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums">
+            {assessment.wpm === null ? "Not recorded" : `${formatNumber(assessment.wpm)} words per minute`}
+          </span>
+        </li>
+      </ul>
+      {chosen && (
+        <p className="text-sm text-ink-2">
+          Chosen activity: <span lang="en" className="font-medium text-ink">{chosen.title.en}</span>
+        </p>
+      )}
+      <Link href={`/results/${assessment.id}`} className="link-quiet">
+        View results
+        <ArrowRightIcon size={16} />
+      </Link>
+    </article>
+  );
+}
+
+// The last two real checks in one language, older ones folded away.
+function LanguageSection({
+  label,
+  checks,
+  passageTitles,
+}: {
+  label: string;
+  checks: AssessmentRow[];
+  passageTitles: Record<string, string>;
+}) {
+  const [latest, previous, ...older] = checks;
+  const title = (assessment: AssessmentRow) => passageTitles[assessment.passageId] ?? "Reading passage";
+  const linked = previous ? compareAssessments(previous, latest) : null;
+
+  return (
+    <section aria-label={`${label} checks`} className="space-y-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-xl font-semibold">{label}</h3>
+        <span className="meta">
+          {checks.length} {checks.length === 1 ? "check" : "checks"}
+        </span>
+      </div>
+
+      <div className="grid items-stretch gap-4 md:grid-cols-2">
+        {previous ? (
+          <RealCheckCard label="Previous check" assessment={previous} title={title(previous)} />
+        ) : (
+          <p className="note-dashed self-start text-ink-2 md:order-2">{NO_FOLLOW_UP_MESSAGE}</p>
+        )}
+        <RealCheckCard label="Latest check" assessment={latest} title={title(latest)} />
+      </div>
+
+      {linked?.kind === "pair" ? (
+        <div className="space-y-2 rounded-xl bg-teal-wash/70 p-4 text-sm text-teal-deep">
+          <p className="font-semibold">Change between these two checks</p>
+          <ul className="space-y-1 tabular-nums">
+            {linked.lines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <p className="text-xs">{COMPARISON_NOTE}</p>
+        </div>
+      ) : (
+        previous && (
+          <p className="text-sm text-ink-2">
+            Side by side only: change is measured only for a linked follow-up on the same passage.
+          </p>
+        )
+      )}
+
+      {older.length > 0 && (
+        <details className="rounded-[14px] border border-line bg-sheet/60 p-4">
+          <summary className="cursor-pointer font-medium text-ink">
+            Older {label} checks ({older.length})
+          </summary>
+          <ul className="mt-3 divide-y divide-line text-sm">
+            {older.map((assessment) => (
+              <li key={assessment.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">
+                <span className="min-w-0">
+                  <span className="font-medium text-ink">{title(assessment)}</span>{" "}
+                  <span className="meta text-xs">{dateLabel(assessment.createdAt)}</span>
+                </span>
+                <span className="flex items-center gap-4 tabular-nums text-ink-2">
+                  <span>Accuracy {percent(assessment.accuracyPercent)}</span>
+                  <span>Comprehension {percent(assessment.comprehensionPercent)}</span>
+                  <Link href={`/results/${assessment.id}`} className="link-quiet">
+                    View
+                    <ArrowRightIcon size={14} />
+                  </Link>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  );
+}
+
 export function ProgressView({ assessments, passageTitles }: ProgressViewProps) {
   const comparisons = buildComparisons(assessments);
-  const realComparisons = comparisons.flatMap((result) => {
-    if (!includesDemo(result)) return [result];
-    const realCheck = realCheckFromMixedPair(result);
-    return realCheck ? [realCheck] : [];
-  });
   const demoComparisons = comparisons.filter(includesDemo);
+  // Real checks, newest first, grouped by passage language.
+  const realChecks = assessments
+    .filter((assessment) => !isDemo(assessment))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   function renderCard(result: ComparisonResult) {
     return (
@@ -180,25 +291,27 @@ export function ProgressView({ assessments, passageTitles }: ProgressViewProps) 
   }
 
   return (
-    <section aria-labelledby="progress-comparison-heading" className="space-y-6">
+    <section aria-labelledby="progress-comparison-heading" className="space-y-8">
       <div>
         <h2 id="progress-comparison-heading" className="text-lg font-semibold">
           Learner progress
         </h2>
         <p className="mt-1 text-sm text-ink-2">
-          Recorded readings and teacher-marked checks appear here. Demo scores are kept separately below.
+          The last two real checks in each language, side by side. Demo scores are kept separately below.
         </p>
       </div>
-      <div className="space-y-4">
-        <h3 className="font-semibold">Real reading checks</h3>
-        {realComparisons.length === 0 ? (
-          <p className="note-dashed text-ink-2">
-            No real reading checks yet. Complete a learner recording or teacher-marked check to see progress here.
-          </p>
-        ) : (
-          renderList(realComparisons)
-        )}
-      </div>
+      {realChecks.length === 0 ? (
+        <p className="note-dashed text-ink-2">
+          No real reading checks yet. Complete a learner recording or teacher-marked check to see progress here.
+        </p>
+      ) : (
+        LANGUAGES.map(({ value, label }) => {
+          const checks = realChecks.filter((assessment) => assessment.language === value);
+          return checks.length > 0 ? (
+            <LanguageSection key={value} label={label} checks={checks} passageTitles={passageTitles} />
+          ) : null;
+        })
+      )}
       {demoComparisons.length > 0 && (
         <details className="group rounded-[14px] border border-dashed border-ink/40 bg-sheet/60 p-5">
           <summary className="cursor-pointer font-semibold text-ink">

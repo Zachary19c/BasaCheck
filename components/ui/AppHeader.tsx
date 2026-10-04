@@ -30,12 +30,7 @@ export function AppHeader() {
               Open dashboard
             </Link>
           </nav>
-        ) : (
-          <span className="tag">
-            <span className="size-1.5 rounded-full bg-teal" aria-hidden="true" />
-            Teacher view
-          </span>
-        )}
+        ) : null}
       </div>
     </header>
   );
