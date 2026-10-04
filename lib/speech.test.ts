@@ -23,6 +23,37 @@ describe("speech client", () => {
     vi.unstubAllGlobals();
   });
 
+  it("uses Groq's hosted Whisper when SPEECH_PROVIDER=groq", async () => {
+    vi.stubEnv("SPEECH_PROVIDER", "groq");
+    vi.stubEnv("GROQ_API_KEY", "test-key");
+    const fetchMock = mockFetch(async () => Response.json({ text: " Maya planted a seed. ", duration: 4.5 }));
+
+    await expect(transcribe(audio, "fil")).resolves.toEqual({
+      transcript: "Maya planted a seed.",
+      durationSeconds: 4.5,
+    });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("https://api.groq.com/openai/v1/audio/transcriptions");
+    const form = init.body as FormData;
+    expect(form.get("language")).toBe("tl");
+    expect(form.get("model")).toBe("whisper-large-v3");
+    expect(form.get("response_format")).toBe("verbose_json");
+    expect((form.get("file") as File).name).toBe("recording.webm");
+  });
+
+  it("reports Groq as unavailable without a key, and maps its errors", async () => {
+    vi.stubEnv("SPEECH_PROVIDER", "groq");
+    vi.stubEnv("GROQ_API_KEY", "");
+    await expectCode(transcribe(audio, "en"), "speech_unavailable");
+
+    vi.stubEnv("GROQ_API_KEY", "test-key");
+    mockFetch(async () => new Response("bad file", { status: 400 }));
+    await expectCode(transcribe(audio, "en"), "invalid_audio");
+    mockFetch(async () => Response.json({ text: "   ", duration: 3 }));
+    await expectCode(transcribe(audio, "en"), "empty_transcript");
+  });
+
   it("maps app languages to faster-whisper codes", () => {
     expect(toWhisperLanguage("fil")).toBe("tl");
     expect(toWhisperLanguage("en")).toBe("en");
